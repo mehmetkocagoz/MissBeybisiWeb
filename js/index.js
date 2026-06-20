@@ -1,0 +1,77 @@
+// MissBeybisi — Homepage logic
+
+function createProductCard(product, rootPrefix = '') {
+  const discount = discountPct(product.price, product.originalPrice);
+  return `
+    <article class="product-card">
+      <a href="${rootPrefix}product.html?slug=${product.slug}" class="product-card__img-wrap">
+        <img
+          src="${imgSrc(product.images[0])}"
+          alt="${product.name}"
+          class="product-card__img product-card__img--main"
+          loading="lazy">
+        ${product.images[1] ? `<img
+          src="${imgSrc(product.images[1])}"
+          alt="${product.name} — görsel 2"
+          class="product-card__img product-card__img--hover"
+          loading="lazy">` : ''}
+        ${discount > 0 ? `<span class="badge badge--sale">-%${discount}</span>` : ''}
+        ${product.isNew ? `<span class="badge badge--new">Yeni</span>` : ''}
+        <div class="product-card__actions">
+          <button class="product-card__quick-add btn btn--primary btn--sm"
+            data-id="${product.id}" data-size="${product.sizes[0]}">
+            Sepete Ekle
+          </button>
+        </div>
+      </a>
+      <div class="product-card__body">
+        <p class="product-card__category">${product.categoryLabel} · ${product.ageLabel}</p>
+        <h3 class="product-card__name">
+          <a href="${rootPrefix}product.html?slug=${product.slug}">${product.name}</a>
+        </h3>
+        <div class="product-card__price">
+          <span class="price-current">${formatPrice(product.price)}</span>
+          ${product.originalPrice ? `<span class="price-original">${formatPrice(product.originalPrice)}</span>` : ''}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Featured products
+  const featuredGrid = document.getElementById('featured-grid');
+  if (featuredGrid) {
+    const featured = getFeaturedProducts().slice(0, 8);
+    featuredGrid.innerHTML = featured.map(p => createProductCard(p)).join('');
+    featuredGrid.querySelectorAll('.product-card__quick-add').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const product = getProductById(parseInt(btn.dataset.id));
+        if (product) {
+          Cart.addItem(product, btn.dataset.size);
+          showToast(`${product.name} sepete eklendi!`);
+          updateCartBadge();
+        }
+      });
+    });
+  }
+
+  // New arrivals ticker
+  const newGrid = document.getElementById('new-grid');
+  if (newGrid) {
+    const newProducts = getNewProducts().slice(0, 4);
+    newGrid.innerHTML = newProducts.map(p => createProductCard(p)).join('');
+    newGrid.querySelectorAll('.product-card__quick-add').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const product = getProductById(parseInt(btn.dataset.id));
+        if (product) {
+          Cart.addItem(product, btn.dataset.size);
+          showToast(`${product.name} sepete eklendi!`);
+          updateCartBadge();
+        }
+      });
+    });
+  }
+});

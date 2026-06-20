@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MissBeybisi Koleksiyon — Tüm kız çocuk elbiseleri. Özel gün ve günlük elbise modelleri, 0–8 yaş arası.">
+  <title>Koleksiyon — MissBeybisi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="site-logo" aria-label="MissBeybisi Ana Sayfa">
+          Miss<span>Beybisi</span>
+        </a>
+        <nav class="site-nav" aria-label="Ana menü">
+          <a href="index.html">Ana Sayfa</a>
+          <a href="products.html" class="active">Koleksiyon</a>
+          <a href="products.html?category=ozel-gun">Özel Gün</a>
+          <a href="products.html?category=gunluk">Günlük</a>
+          <a href="products.html?age=0-2-yas">0–2 Yaş</a>
+          <a href="products.html?age=2-4-yas">2–4 Yaş</a>
+          <a href="products.html?age=4-8-yas">4–8 Yaş</a>
+        </nav>
+        <div class="header-actions">
+          <button class="header-btn" id="cart-btn" aria-label="Sepet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span class="cart-badge" aria-live="polite">0</span>
+          </button>
+          <button class="nav-toggle" id="nav-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Menüyü aç/kapat">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav id="nav-menu" aria-label="Mobil menü">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="products.html">Koleksiyon</a>
+    <a href="products.html?category=ozel-gun">Özel Gün</a>
+    <a href="products.html?category=gunluk">Günlük</a>
+    <a href="products.html?age=0-2-yas">0–2 Yaş</a>
+    <a href="products.html?age=2-4-yas">2–4 Yaş</a>
+    <a href="products.html?age=4-8-yas">4–8 Yaş</a>
+  </nav>
+
+  <main>
+
+    <!-- ── Page Hero ── -->
+    <div class="page-hero">
+      <div class="container">
+        <h1>Koleksiyon</h1>
+        <p>Küçük prensesler için özenle seçilmiş elbise modelleri</p>
+      </div>
+    </div>
+
+    <!-- ── Products Layout ── -->
+    <div class="container">
+      <div class="products-layout">
+
+        <!-- Filter Sidebar -->
+        <aside class="filter-sidebar" id="filter-sidebar" aria-label="Ürün filtreleri">
+          <div class="filter-sidebar__header">
+            <h3>Filtrele</h3>
+            <button class="btn btn--ghost btn--sm" id="filter-reset">Sıfırla</button>
+          </div>
+
+          <div class="filter-group">
+            <p class="filter-group__title">Kategori</p>
+            <div class="filter-chips" role="group" aria-label="Kategori filtresi">
+              <button class="filter-chip active" data-filter-category="all">Tümü</button>
+              <button class="filter-chip" data-filter-category="ozel-gun">Özel Gün</button>
+              <button class="filter-chip" data-filter-category="gunluk">Günlük</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <p class="filter-group__title">Yaş Grubu</p>
+            <div class="filter-chips" role="group" aria-label="Yaş grubu filtresi">
+              <button class="filter-chip active" data-filter-age="all">Tümü</button>
+              <button class="filter-chip" data-filter-age="0-2-yas">0–2 Yaş</button>
+              <button class="filter-chip" data-filter-age="2-4-yas">2–4 Yaş</button>
+              <button class="filter-chip" data-filter-age="4-8-yas">4–8 Yaş</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <p class="filter-group__title">Fiyat Aralığı</p>
+            <div class="price-inputs">
+              <input type="number" id="price-min" placeholder="Min ₺" min="0" aria-label="Minimum fiyat">
+              <span>—</span>
+              <input type="number" id="price-max" placeholder="Max ₺" min="0" aria-label="Maksimum fiyat">
+            </div>
+            <button class="btn btn--ghost btn--sm btn--full" id="price-apply" style="margin-top: 10px;">Uygula</button>
+          </div>
+        </aside>
+
+        <!-- Products Main -->
+        <div class="products-main">
+          <div class="products-toolbar">
+            <div class="products-toolbar__left">
+              <button class="filter-toggle-btn" id="filter-toggle" aria-label="Filtreleri aç/kapat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path d="M3 4h18M7 12h10M11 20h2"/>
+                </svg>
+                Filtrele
+              </button>
+              <span id="product-count" aria-live="polite"></span>
+            </div>
+
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input type="search" id="search-input" placeholder="Ürün ara…" aria-label="Ürün ara">
+            </div>
+
+            <select class="sort-select" id="sort-select" aria-label="Sıralama">
+              <option value="default">Önerilen</option>
+              <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
+              <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
+              <option value="newest">Yeni Gelenler</option>
+              <option value="discount">En Çok İndirim</option>
+            </select>
+          </div>
+
+          <div class="product-grid" id="product-grid" aria-label="Ürün listesi">
+            <!-- Populated by products-page.js -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="site-logo">Miss<span>Beybisi</span></a>
+          <p>Küçük prensesler için özenle tasarlanmış kız çocuk elbiseleri.</p>
+          <div class="footer-social" aria-label="Sosyal medya">
+            <a href="#" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="#" aria-label="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Koleksiyon</h4>
+          <ul class="footer-links">
+            <li><a href="products.html">Tüm Ürünler</a></li>
+            <li><a href="products.html?category=ozel-gun">Özel Gün</a></li>
+            <li><a href="products.html?category=gunluk">Günlük</a></li>
+            <li><a href="products.html?sort=newest">Yeni Gelenler</a></li>
+            <li><a href="products.html?sort=discount">İndirimler</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Yaş Grupları</h4>
+          <ul class="footer-links">
+            <li><a href="products.html?age=0-2-yas">0–2 Yaş</a></li>
+            <li><a href="products.html?age=2-4-yas">2–4 Yaş</a></li>
+            <li><a href="products.html?age=4-8-yas">4–8 Yaş</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Bilgi</h4>
+          <ul class="footer-links">
+            <li><a href="#">Hakkımızda</a></li>
+            <li><a href="#">İletişim</a></li>
+            <li><a href="#">Kargo & İade</a></li>
+            <li><a href="#">Beden Rehberi</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 MissBeybisi. Tüm hakları saklıdır.</p>
+        <p>Sevgiyle tasarlandı 🌸</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/products-page.js"></script>
+  <script>
+    // Read URL param for sort
+    const urlSort = new URLSearchParams(window.location.search).get('sort');
+    if (urlSort) {
+      document.addEventListener('DOMContentLoaded', () => {
+        const sel = document.getElementById('sort-select');
+        if (sel) { sel.value = urlSort; currentFilters.sortBy = urlSort; applyFilters(); }
+      });
+    }
+  </script>
+</body>
+</html>

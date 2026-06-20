@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MissBeybisi — Küçük Prensesler için El Yapımı Elbiseler. Özel günler ve günlük kullanım için şık kız çocuk elbiseleri.">
+  <title>MissBeybisi — Kız Çocuk Elbiseleri</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="site-logo" aria-label="MissBeybisi Ana Sayfa">
+          Miss<span>Beybisi</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Ana menü">
+          <a href="index.html" class="active">Ana Sayfa</a>
+          <a href="products.html">Koleksiyon</a>
+          <a href="products.html?category=ozel-gun">Özel Gün</a>
+          <a href="products.html?category=gunluk">Günlük</a>
+          <a href="products.html?age=0-2-yas">0–2 Yaş</a>
+          <a href="products.html?age=2-4-yas">2–4 Yaş</a>
+          <a href="products.html?age=4-8-yas">4–8 Yaş</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="header-btn" id="cart-btn" aria-label="Sepet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span class="cart-badge" aria-live="polite">0</span>
+          </button>
+          <button class="nav-toggle" id="nav-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Menüyü aç/kapat">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav id="nav-menu" aria-label="Mobil menü">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="products.html">Koleksiyon</a>
+    <a href="products.html?category=ozel-gun">Özel Gün</a>
+    <a href="products.html?category=gunluk">Günlük</a>
+    <a href="products.html?age=0-2-yas">0–2 Yaş</a>
+    <a href="products.html?age=2-4-yas">2–4 Yaş</a>
+    <a href="products.html?age=4-8-yas">4–8 Yaş</a>
+  </nav>
+
+  <main>
+
+    <!-- ── Hero ── -->
+    <section class="hero" aria-label="Ana banner">
+      <div class="hero__bg">
+        <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.57%20(5).jpeg"
+          alt="MissBeybisi prenses elbise koleksiyonu" loading="eager">
+      </div>
+      <div class="container">
+        <div class="hero__content animate-fade-up">
+          <p class="hero__eyebrow">Yeni Koleksiyon 2026</p>
+          <h1 class="hero__title">
+            Küçük Prensesler<br>
+            için <em>Büyülü</em><br>
+            Elbiseler
+          </h1>
+          <p class="hero__subtitle">
+            Her özel an için el yapımı, özenle tasarlanmış kız çocuk elbiseleri.
+            Kalite ve zarafeti bir arada sunan MissBeybisi koleksiyonunu keşfedin.
+          </p>
+          <div class="hero__actions">
+            <a href="products.html" class="btn btn--primary btn--lg">Koleksiyonu Keşfet</a>
+            <a href="products.html?category=ozel-gun" class="btn btn--ghost btn--lg">Özel Gün</a>
+          </div>
+        </div>
+      </div>
+      <div class="hero__scroll" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ── Promise Strip ── -->
+    <div class="promise-strip" role="complementary" aria-label="Hizmetlerimiz">
+      <div class="container">
+        <div class="promise-strip__inner">
+          <div class="promise-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            <strong>Ücretsiz Kargo</strong>
+            <span>250₺ ve üzeri siparişlerde</span>
+          </div>
+          <div class="promise-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <strong>14 Gün İade</strong>
+            <span>Koşulsuz iade garantisi</span>
+          </div>
+          <div class="promise-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <strong>%100 Orijinal</strong>
+            <span>Güvenli alışveriş</span>
+          </div>
+          <div class="promise-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <strong>7/24 Destek</strong>
+            <span>WhatsApp ile ulaşın</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Featured Products ── -->
+    <section class="section" aria-labelledby="featured-title">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title" id="featured-title">Öne Çıkan Ürünler</h2>
+          <a href="products.html" class="section-link">
+            Tümünü Gör
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          </a>
+        </div>
+        <div class="product-grid" id="featured-grid" aria-label="Öne çıkan ürünler">
+          <!-- Populated by index.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Brand Intro ── -->
+    <section class="brand-intro section" aria-labelledby="about-title">
+      <div class="container">
+        <div class="brand-intro__inner">
+          <div class="brand-intro__imgs reveal">
+            <div class="brand-intro__img brand-intro__img--main">
+              <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.57%20(9).jpeg"
+                alt="MissBeybisi özel gün elbisesi" loading="lazy">
+            </div>
+            <div class="brand-intro__img brand-intro__img--accent">
+              <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.58%20(2).jpeg"
+                alt="MissBeybisi tül elbise detay" loading="lazy">
+            </div>
+          </div>
+          <div class="brand-intro__text reveal">
+            <span class="brand-intro__tag">Hakkımızda</span>
+            <h2 class="brand-intro__title" id="about-title">
+              Her Kıyafette<br><em>Bir Masal</em> Var
+            </h2>
+            <p class="brand-intro__body">
+              MissBeybisi olarak küçük kızlarınız için sadece elbise değil,
+              anılar tasarlıyoruz. 2018'den bu yana özenle seçilmiş kumaşlar
+              ve el işçiliğiyle hazırladığımız her parça, prensesinizin
+              özel günlerini unutulmaz kılıyor.
+            </p>
+            <p class="brand-intro__body">
+              Bebek tenine duyarlı pamuklu iç astarlar, kaliteli dantelalar
+              ve uzun ömürlü dikişlerle hazırlanan koleksiyonumuz;
+              hem annenin hem de bebeğinin favorisi olacak.
+            </p>
+            <div class="brand-intro__stats">
+              <div class="stat">
+                <span class="stat__num">2K+</span>
+                <span class="stat__label">Mutlu Aile</span>
+              </div>
+              <div class="stat">
+                <span class="stat__num">100+</span>
+                <span class="stat__label">Ürün Çeşidi</span>
+              </div>
+              <div class="stat">
+                <span class="stat__num">8</span>
+                <span class="stat__label">Yıllık Deneyim</span>
+              </div>
+            </div>
+            <a href="products.html" class="btn btn--primary" style="margin-top: 8px; align-self: flex-start;">
+              Koleksiyonu İncele
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Categories ── -->
+    <section class="section" style="background: var(--bg-card);" aria-labelledby="categories-title">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title" id="categories-title">Kategoriler</h2>
+        </div>
+        <div class="category-grid reveal">
+          <a href="products.html?category=ozel-gun" class="category-card">
+            <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.56%20(8).jpeg"
+              alt="Özel Gün Elbiseleri" loading="lazy">
+            <div class="category-card__overlay"></div>
+            <div class="category-card__body">
+              <p class="category-card__name">Özel Gün</p>
+              <p class="category-card__count">10 ürün</p>
+            </div>
+          </a>
+          <a href="products.html?category=gunluk" class="category-card">
+            <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.56%20(4).jpeg"
+              alt="Günlük Elbiseler" loading="lazy">
+            <div class="category-card__overlay"></div>
+            <div class="category-card__body">
+              <p class="category-card__name">Günlük</p>
+              <p class="category-card__count">6 ürün</p>
+            </div>
+          </a>
+          <a href="products.html?age=0-2-yas" class="category-card">
+            <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.56%20(12).jpeg"
+              alt="0-2 Yaş Elbiseleri" loading="lazy">
+            <div class="category-card__overlay"></div>
+            <div class="category-card__body">
+              <p class="category-card__name">0–2 Yaş</p>
+              <p class="category-card__count">Bebek koleksiyonu</p>
+            </div>
+          </a>
+          <a href="products.html?age=4-8-yas" class="category-card">
+            <img src="photos/WhatsApp%20Image%202026-06-14%20at%2022.31.57%20(1).jpeg"
+              alt="4-8 Yaş Elbiseleri" loading="lazy">
+            <div class="category-card__overlay"></div>
+            <div class="category-card__body">
+              <p class="category-card__name">4–8 Yaş</p>
+              <p class="category-card__count">Büyük kız koleksiyonu</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── New Arrivals ── -->
+    <section class="section" aria-labelledby="new-title">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title" id="new-title">Yeni Gelenler</h2>
+          <a href="products.html?sort=newest" class="section-link">
+            Tümünü Gör
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          </a>
+        </div>
+        <div class="product-grid" id="new-grid" aria-label="Yeni ürünler">
+          <!-- Populated by index.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Newsletter ── -->
+    <section class="newsletter reveal" aria-labelledby="newsletter-title">
+      <div class="container">
+        <p class="newsletter__eyebrow">Bülten</p>
+        <h2 class="newsletter__title" id="newsletter-title">Yeni Ürünlerden İlk Siz Haberdar Olun</h2>
+        <p class="newsletter__body">
+          E-bültenimize kaydolun, yeni koleksiyonlar ve özel indirimlerden anında haberdar olun.
+        </p>
+        <form class="newsletter__form" onsubmit="handleNewsletter(event)">
+          <input class="newsletter__input" type="email" placeholder="E-posta adresiniz" required aria-label="E-posta adresi">
+          <button type="submit" class="btn btn--primary">Kaydol</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="site-logo">Miss<span>Beybisi</span></a>
+          <p>Küçük prensesler için özenle tasarlanmış kız çocuk elbiseleri. Her kıyafette bir masal var.</p>
+          <div class="footer-social" aria-label="Sosyal medya">
+            <a href="#" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="#" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+            </a>
+            <a href="#" aria-label="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Koleksiyon</h4>
+          <ul class="footer-links">
+            <li><a href="products.html">Tüm Ürünler</a></li>
+            <li><a href="products.html?category=ozel-gun">Özel Gün</a></li>
+            <li><a href="products.html?category=gunluk">Günlük</a></li>
+            <li><a href="products.html?sort=newest">Yeni Gelenler</a></li>
+            <li><a href="products.html?sort=discount">İndirimler</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Yaş Grupları</h4>
+          <ul class="footer-links">
+            <li><a href="products.html?age=0-2-yas">0–2 Yaş</a></li>
+            <li><a href="products.html?age=2-4-yas">2–4 Yaş</a></li>
+            <li><a href="products.html?age=4-8-yas">4–8 Yaş</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Bilgi</h4>
+          <ul class="footer-links">
+            <li><a href="#">Hakkımızda</a></li>
+            <li><a href="#">İletişim</a></li>
+            <li><a href="#">Kargo & İade</a></li>
+            <li><a href="#">Beden Rehberi</a></li>
+            <li><a href="#">Gizlilik Politikası</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 MissBeybisi. Tüm hakları saklıdır.</p>
+        <p>Sevgiyle tasarlandı 🌸</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/index.js"></script>
+  <script>
+    function handleNewsletter(e) {
+      e.preventDefault();
+      showToast('Bültenimize başarıyla kaydoldunuz!');
+      e.target.reset();
+    }
+
+    // Intersection Observer for reveal animations
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(el => {
+        if (el.isIntersecting) {
+          el.target.classList.add('visible');
+          observer.unobserve(el.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

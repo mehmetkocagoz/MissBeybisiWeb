@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ürünler — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a> &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Ürünler</h1>
+      <div class="topbar-actions">
+        <button class="btn btn--primary" id="add-product-btn">+ Yeni Ürün</button>
+      </div>
+    </div>
+    <div class="admin-content">
+      <div class="toolbar">
+        <input class="search-input" id="search" type="search" placeholder="Ürün adı veya slug ara…">
+        <select id="filter-category" class="search-input" style="min-width:150px">
+          <option value="">Tüm Kategoriler</option>
+          <option value="ozel-gun">Özel Gün</option>
+          <option value="gunluk">Günlük</option>
+        </select>
+        <select id="filter-age" class="search-input" style="min-width:140px">
+          <option value="">Tüm Yaşlar</option>
+          <option value="0-2-yas">0–2 Yaş</option>
+          <option value="2-4-yas">2–4 Yaş</option>
+          <option value="4-8-yas">4–8 Yaş</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ürün</th>
+                <th>Kategori</th>
+                <th>Yaş</th>
+                <th>Fiyat</th>
+                <th>Öne Çıkan</th>
+                <th>Yeni</th>
+                <th>Durum</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="products-body">
+              <tr><td colspan="8"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product modal -->
+  <div class="modal-backdrop hidden" id="product-modal">
+    <div class="modal" style="max-width:640px">
+      <div class="modal__header">
+        <h2 class="modal__title" id="product-modal-title">Ürün Ekle</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <form id="product-form">
+        <input type="hidden" id="p-id">
+        <div class="form-grid">
+          <div class="form-group form-group--full">
+            <label>Ürün Adı</label>
+            <input type="text" id="p-name" required>
+          </div>
+          <div class="form-group form-group--full">
+            <label>Slug</label>
+            <input type="text" id="p-slug" required placeholder="ornek-urun-adi">
+          </div>
+          <div class="form-group">
+            <label>Fiyat (₺)</label>
+            <input type="number" id="p-price" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Eski Fiyat (₺)</label>
+            <input type="number" id="p-original-price" min="0" step="0.01" placeholder="İndirim yoksa boş bırak">
+          </div>
+          <div class="form-group">
+            <label>Kategori</label>
+            <select id="p-category" required>
+              <option value="ozel-gun">Özel Gün</option>
+              <option value="gunluk">Günlük</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Yaş Grubu</label>
+            <select id="p-age-group" required>
+              <option value="0-2-yas">0–2 Yaş</option>
+              <option value="2-4-yas">2–4 Yaş</option>
+              <option value="4-8-yas">4–8 Yaş</option>
+            </select>
+          </div>
+          <div class="form-group form-group--full">
+            <label>Renkler (virgülle ayırın)</label>
+            <input type="text" id="p-colors" placeholder="Pembe, Beyaz, Lila">
+          </div>
+          <div class="form-group form-group--full">
+            <label>Bedenler (virgülle ayırın)</label>
+            <input type="text" id="p-sizes" placeholder="2 Yaş, 3 Yaş, 4 Yaş">
+          </div>
+          <div class="form-group form-group--full">
+            <label>Açıklama</label>
+            <textarea id="p-description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="p-featured"> Öne Çıkan
+            </label>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="p-is-new"> Yeni Ürün
+            </label>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="submit" class="btn btn--primary">Kaydet</button>
+          <button type="button" class="btn btn--ghost modal__close">İptal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, fmtMoney, showToast, openModal, closeModal } from './js/admin-common.js';
+
+    let allProducts = [];
+
+    async function load() {
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (error) { console.error(error); return; }
+      allProducts = data || [];
+      render(allProducts);
+    }
+
+    function render(products) {
+      const tbody = document.getElementById('products-body');
+      if (!products.length) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state__icon">👗</div><div class="empty-state__text">Ürün bulunamadı</div></div></td></tr>';
+        return;
+      }
+      const catLabel = { 'ozel-gun': 'Özel Gün', 'gunluk': 'Günlük' };
+      const ageLabel = { '0-2-yas': '0–2 Yaş', '2-4-yas': '2–4 Yaş', '4-8-yas': '4–8 Yaş' };
+      tbody.innerHTML = products.map(p => `
+        <tr>
+          <td style="font-weight:600">${p.name}</td>
+          <td>${catLabel[p.category] || p.category}</td>
+          <td>${ageLabel[p.age_group] || p.age_group}</td>
+          <td>${fmtMoney(p.price)}</td>
+          <td>${p.featured ? '✅' : '—'}</td>
+          <td>${p.is_new ? '🆕' : '—'}</td>
+          <td><span class="badge ${p.active ? 'badge--green' : 'badge--red'}">${p.active ? 'Aktif' : 'Pasif'}</span></td>
+          <td style="display:flex;gap:6px">
+            <button class="btn btn--ghost btn--sm" data-edit="${p.id}">Düzenle</button>
+            <button class="btn btn--danger btn--sm" data-del="${p.id}">Sil</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openEdit(btn.dataset.edit)));
+      tbody.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => del(btn.dataset.del)));
+    }
+
+    function filter() {
+      const q   = document.getElementById('search').value.toLowerCase();
+      const cat = document.getElementById('filter-category').value;
+      const age = document.getElementById('filter-age').value;
+      return allProducts.filter(p =>
+        (!q   || p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)) &&
+        (!cat || p.category === cat) &&
+        (!age || p.age_group === age)
+      );
+    }
+
+    document.getElementById('search').addEventListener('input', () => render(filter()));
+    document.getElementById('filter-category').addEventListener('change', () => render(filter()));
+    document.getElementById('filter-age').addEventListener('change', () => render(filter()));
+
+    // Auto-generate slug from name
+    document.getElementById('p-name').addEventListener('input', e => {
+      if (!document.getElementById('p-id').value) {
+        document.getElementById('p-slug').value = e.target.value
+          .toLowerCase().trim()
+          .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+          .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+          .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      }
+    });
+
+    document.getElementById('add-product-btn').addEventListener('click', () => {
+      document.getElementById('product-modal-title').textContent = 'Yeni Ürün';
+      document.getElementById('product-form').reset();
+      document.getElementById('p-id').value = '';
+      openModal('product-modal');
+    });
+
+    function openEdit(id) {
+      const p = allProducts.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('product-modal-title').textContent = 'Ürünü Düzenle';
+      document.getElementById('p-id').value            = p.id;
+      document.getElementById('p-name').value          = p.name;
+      document.getElementById('p-slug').value          = p.slug;
+      document.getElementById('p-price').value         = p.price;
+      document.getElementById('p-original-price').value = p.original_price || '';
+      document.getElementById('p-category').value      = p.category;
+      document.getElementById('p-age-group').value     = p.age_group;
+      document.getElementById('p-colors').value        = (p.colors || []).join(', ');
+      document.getElementById('p-sizes').value         = (p.sizes || []).join(', ');
+      document.getElementById('p-description').value   = p.description || '';
+      document.getElementById('p-featured').checked    = p.featured;
+      document.getElementById('p-is-new').checked      = p.is_new;
+      openModal('product-modal');
+    }
+
+    document.getElementById('product-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const id = document.getElementById('p-id').value;
+      const payload = {
+        name:           document.getElementById('p-name').value.trim(),
+        slug:           document.getElementById('p-slug').value.trim(),
+        price:          parseFloat(document.getElementById('p-price').value),
+        original_price: document.getElementById('p-original-price').value ? parseFloat(document.getElementById('p-original-price').value) : null,
+        category:       document.getElementById('p-category').value,
+        age_group:      document.getElementById('p-age-group').value,
+        colors:         document.getElementById('p-colors').value.split(',').map(s => s.trim()).filter(Boolean),
+        sizes:          document.getElementById('p-sizes').value.split(',').map(s => s.trim()).filter(Boolean),
+        description:    document.getElementById('p-description').value.trim(),
+        featured:       document.getElementById('p-featured').checked,
+        is_new:         document.getElementById('p-is-new').checked,
+        active:         true,
+      };
+      if (id) payload.id = id;
+
+      const { error } = await supabase.from('products').upsert(payload);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast(id ? 'Ürün güncellendi' : 'Ürün eklendi');
+      closeModal('product-modal');
+      load();
+    });
+
+    async function del(id) {
+      if (!confirm('Bu ürünü pasife almak istediğinize emin misiniz?')) return;
+      const { error } = await supabase.from('products').update({ active: false }).eq('id', id);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast('Ürün pasife alındı');
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

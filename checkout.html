@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ödeme — MissBeybisi</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/checkout.css">
+</head>
+<body>
+
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="site-logo" aria-label="MissBeybisi Ana Sayfa">
+          Miss<span>Beybisi</span>
+        </a>
+        <div class="checkout-steps" aria-label="Sipariş adımları">
+          <span class="step active">Sepet</span>
+          <span class="step-sep">›</span>
+          <span class="step active" id="step-info-label">Bilgiler</span>
+          <span class="step-sep">›</span>
+          <span class="step" id="step-pay-label">Ödeme</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-main">
+    <div class="container">
+      <div class="checkout-layout">
+
+        <!-- ── Left: Form ── -->
+        <div class="checkout-form-col">
+
+          <!-- Step 1: Customer info -->
+          <section id="step-info" class="checkout-step">
+            <h2 class="checkout-step__title">Teslimat Bilgileri</h2>
+            <form id="info-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="first-name">Ad</label>
+                  <input type="text" id="first-name" name="firstName" required autocomplete="given-name">
+                </div>
+                <div class="form-group">
+                  <label for="last-name">Soyad</label>
+                  <input type="text" id="last-name" name="lastName" required autocomplete="family-name">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">E-posta</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+              </div>
+              <div class="form-group">
+                <label for="phone">Telefon</label>
+                <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="05xx xxx xx xx">
+              </div>
+              <div class="form-group">
+                <label for="address">Adres</label>
+                <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">Şehir</label>
+                  <input type="text" id="city" name="city" required autocomplete="address-level2">
+                </div>
+                <div class="form-group">
+                  <label for="postal-code">Posta Kodu</label>
+                  <input type="text" id="postal-code" name="postalCode" autocomplete="postal-code">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="notes">Sipariş Notu (isteğe bağlı)</label>
+                <textarea id="notes" name="notes" rows="2" placeholder="Kurye için not, özel istek vb."></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary btn--full">Ödemeye Geç →</button>
+            </form>
+          </section>
+
+          <!-- Step 2: Payment -->
+          <section id="step-pay" class="checkout-step hidden">
+            <h2 class="checkout-step__title">Ödeme</h2>
+
+            <div class="payment-methods">
+              <label class="payment-method-option">
+                <input type="radio" name="paymentMethod" value="iyzico" checked>
+                <span class="payment-method-label">
+                  <img src="https://www.iyzico.com/assets/images/iyzico-logo.svg" alt="İyzico" height="24" onerror="this.style.display='none'">
+                  Kredi / Banka Kartı
+                  <span class="payment-method-sub">İyzico güvencesiyle güvenli ödeme</span>
+                </span>
+              </label>
+              <label class="payment-method-option">
+                <input type="radio" name="paymentMethod" value="bank_transfer">
+                <span class="payment-method-label">
+                  🏦 Havale / EFT
+                  <span class="payment-method-sub">Sipariş onaylanınca hesap bilgileri gönderilir</span>
+                </span>
+              </label>
+            </div>
+
+            <!-- İyzico card form injected here -->
+            <div id="iyzico-checkout-form" class="iyzico-form-container">
+              <!-- İyzico Checkout Form JS will render here -->
+              <p class="iyzico-loading">Ödeme formu yükleniyor...</p>
+            </div>
+
+            <div id="bank-transfer-info" class="bank-info hidden">
+              <p>Aşağıdaki hesaba siparişinizin tutarını aktarın, açıklamaya sipariş numaranızı yazın:</p>
+              <table class="bank-table">
+                <tr><td>Banka</td><td><strong>Ziraat Bankası</strong></td></tr>
+                <tr><td>Alıcı</td><td><strong>MissBeybisi</strong></td></tr>
+                <tr><td>IBAN</td><td><strong id="bank-iban">TR00 0000 0000 0000 0000 0000 00</strong></td></tr>
+              </table>
+              <button class="btn btn--primary btn--full" id="confirm-bank-btn">Siparişi Onayla</button>
+            </div>
+
+            <button class="btn btn--ghost" id="back-to-info">← Bilgilere Dön</button>
+          </section>
+
+        </div>
+
+        <!-- ── Right: Order Summary ── -->
+        <aside class="checkout-summary" aria-label="Sipariş özeti">
+          <h3 class="checkout-summary__title">Sipariş Özeti</h3>
+          <div id="summary-items" class="summary-items">
+            <!-- Populated by checkout.js -->
+          </div>
+          <div class="summary-totals">
+            <div class="summary-row">
+              <span>Ara Toplam</span>
+              <span id="summary-subtotal">₺0,00</span>
+            </div>
+            <div class="summary-row">
+              <span>Kargo</span>
+              <span id="summary-shipping">Ücretsiz</span>
+            </div>
+            <div class="summary-row summary-row--total">
+              <span>Toplam</span>
+              <span id="summary-total">₺0,00</span>
+            </div>
+          </div>
+          <p class="summary-secure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Güvenli SSL bağlantısı
+          </p>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './js/config.js';
+    window.SUPABASE_URL      = SUPABASE_URL;
+    window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+  </script>
+  <script src="js/cart.js"></script>
+  <script type="module" src="js/checkout.js"></script>
+
+</body>
+</html>

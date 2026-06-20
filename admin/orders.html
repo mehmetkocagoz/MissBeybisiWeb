@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Siparişler — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a> &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Siparişler</h1>
+    </div>
+    <div class="admin-content">
+
+      <div class="toolbar">
+        <input class="search-input" id="search" type="search" placeholder="Müşteri adı veya sipariş no ara…">
+        <select id="filter-status" class="search-input" style="min-width:160px">
+          <option value="">Tüm Durumlar</option>
+          <option value="pending">Bekliyor</option>
+          <option value="paid">Ödendi</option>
+          <option value="processing">Hazırlanıyor</option>
+          <option value="shipped">Kargoda</option>
+          <option value="delivered">Teslim Edildi</option>
+          <option value="cancelled">İptal</option>
+          <option value="refunded">İade</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sipariş No</th>
+                <th>Müşteri</th>
+                <th>E-posta</th>
+                <th>Tutar</th>
+                <th>Ödeme</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="orders-body">
+              <tr><td colspan="8"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order detail modal -->
+  <div class="modal-backdrop hidden" id="order-modal">
+    <div class="modal" style="max-width:680px">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modal-order-no">Sipariş Detayı</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <div id="modal-order-body"></div>
+      <div class="modal__footer">
+        <label style="font-size:13px;font-weight:600">Durum:
+          <select id="modal-status-select" style="margin-left:8px;padding:6px 10px;border-radius:6px;border:1.5px solid var(--border)">
+            <option value="pending">Bekliyor</option>
+            <option value="paid">Ödendi</option>
+            <option value="processing">Hazırlanıyor</option>
+            <option value="shipped">Kargoda</option>
+            <option value="delivered">Teslim Edildi</option>
+            <option value="cancelled">İptal</option>
+            <option value="refunded">İade</option>
+          </select>
+        </label>
+        <button class="btn btn--primary" id="modal-save-btn">Kaydet</button>
+        <button class="btn btn--ghost modal__close">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, fmtMoney, fmtDate, showToast, openModal, closeModal } from './js/admin-common.js';
+
+    let allOrders = [];
+    let currentOrderId = null;
+
+    async function loadOrders() {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .order('created_at', { ascending: false });
+      if (error) { console.error(error); return; }
+      allOrders = data || [];
+      renderTable(allOrders);
+    }
+
+    const statusLabel = { pending:'Bekliyor', paid:'Ödendi', processing:'Hazırlanıyor', shipped:'Kargoda', delivered:'Teslim', cancelled:'İptal', refunded:'İade' };
+    const statusBadgeClass = { pending:'badge--yellow', paid:'badge--green', processing:'badge--blue', shipped:'badge--blue', delivered:'badge--green', cancelled:'badge--red', refunded:'badge--gray' };
+
+    function renderTable(orders) {
+      const tbody = document.getElementById('orders-body');
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state__icon">🛒</div><div class="empty-state__text">Sipariş bulunamadı</div></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td style="font-weight:600;color:var(--accent)">#${o.id.slice(0,8).toUpperCase()}</td>
+          <td>${o.customer_name}</td>
+          <td style="font-size:13px;color:var(--text-muted)">${o.customer_email}</td>
+          <td>${fmtMoney(o.total_amount)}</td>
+          <td>${o.payment_method === 'iyzico' ? '💳 Kart' : o.payment_method === 'bank_transfer' ? '🏦 Havale' : '💵 Nakit'}</td>
+          <td><span class="badge ${statusBadgeClass[o.status] || 'badge--gray'}">${statusLabel[o.status] || o.status}</span></td>
+          <td style="font-size:13px">${fmtDate(o.created_at)}</td>
+          <td><button class="btn btn--ghost btn--sm" data-id="${o.id}">Detay</button></td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => openOrderDetail(btn.dataset.id));
+      });
+    }
+
+    function openOrderDetail(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      currentOrderId = id;
+      document.getElementById('modal-order-no').textContent = `Sipariş #${id.slice(0,8).toUpperCase()}`;
+      document.getElementById('modal-status-select').value = o.status;
+
+      const items = (o.order_items || []).map(it => `
+        <tr>
+          <td>${it.product_name}</td>
+          <td>${it.color} / ${it.size}</td>
+          <td>${it.quantity}</td>
+          <td>${fmtMoney(it.unit_price)}</td>
+          <td>${fmtMoney(it.total)}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('modal-order-body').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;font-size:14px">
+          <div><strong>Müşteri:</strong> ${o.customer_name}</div>
+          <div><strong>E-posta:</strong> ${o.customer_email}</div>
+          <div><strong>Telefon:</strong> ${o.customer_phone || '—'}</div>
+          <div><strong>Şehir:</strong> ${o.city}</div>
+          <div style="grid-column:1/-1"><strong>Adres:</strong> ${o.shipping_address}</div>
+          ${o.notes ? `<div style="grid-column:1/-1"><strong>Not:</strong> ${o.notes}</div>` : ''}
+        </div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:6px 8px;text-align:left">Ürün</th>
+            <th style="padding:6px 8px;text-align:left">Renk/Beden</th>
+            <th style="padding:6px 8px;text-align:left">Adet</th>
+            <th style="padding:6px 8px;text-align:left">Birim</th>
+            <th style="padding:6px 8px;text-align:left">Toplam</th>
+          </tr></thead>
+          <tbody>${items}</tbody>
+          <tfoot><tr>
+            <td colspan="4" style="padding:8px;text-align:right;font-weight:700">Genel Toplam:</td>
+            <td style="padding:8px;font-weight:700">${fmtMoney(o.total_amount)}</td>
+          </tr></tfoot>
+        </table>
+      `;
+      openModal('order-modal');
+    }
+
+    document.getElementById('modal-save-btn').addEventListener('click', async () => {
+      const newStatus = document.getElementById('modal-status-select').value;
+      const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', currentOrderId);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      const o = allOrders.find(x => x.id === currentOrderId);
+      if (o) o.status = newStatus;
+      renderTable(filterOrders());
+      closeModal('order-modal');
+      showToast('Sipariş durumu güncellendi');
+    });
+
+    function filterOrders() {
+      const q      = document.getElementById('search').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      return allOrders.filter(o =>
+        (!q      || o.customer_name.toLowerCase().includes(q) || o.id.toLowerCase().includes(q)) &&
+        (!status || o.status === status)
+      );
+    }
+
+    document.getElementById('search').addEventListener('input',        () => renderTable(filterOrders()));
+    document.getElementById('filter-status').addEventListener('change', () => renderTable(filterOrders()));
+
+    loadOrders();
+  </script>
+</body>
+</html>

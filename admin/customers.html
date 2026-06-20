@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Müşteriler — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a> &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Müşteriler</h1>
+      <div class="topbar-actions">
+        <button class="btn btn--primary" id="add-btn">+ Yeni Müşteri</button>
+      </div>
+    </div>
+    <div class="admin-content">
+      <div class="toolbar">
+        <input class="search-input" id="search" type="search" placeholder="İsim, e-posta veya telefon ara…">
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Telefon</th>
+                <th>Şehir</th>
+                <th>Kayıt Tarihi</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop hidden" id="item-modal">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modal-title">Müşteri Ekle</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <form id="item-form">
+        <input type="hidden" id="f-id">
+        <div class="form-grid">
+          <div class="form-group form-group--full">
+            <label>Ad Soyad</label>
+            <input type="text" id="f-name" required>
+          </div>
+          <div class="form-group">
+            <label>E-posta</label>
+            <input type="email" id="f-email">
+          </div>
+          <div class="form-group">
+            <label>Telefon</label>
+            <input type="tel" id="f-phone">
+          </div>
+          <div class="form-group form-group--full">
+            <label>Adres</label>
+            <textarea id="f-address" rows="2"></textarea>
+          </div>
+          <div class="form-group form-group--full">
+            <label>Şehir</label>
+            <input type="text" id="f-city">
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="submit" class="btn btn--primary">Kaydet</button>
+          <button type="button" class="btn btn--ghost modal__close">İptal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, fmtDate, showToast, openModal, closeModal } from './js/admin-common.js';
+
+    let all = [];
+
+    async function load() {
+      const { data } = await supabase.from('customers').select('*').order('name');
+      all = data || [];
+      render(all);
+    }
+
+    function render(rows) {
+      const tbody = document.getElementById('table-body');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">👥</div><div class="empty-state__text">Müşteri bulunamadı</div></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(c => `
+        <tr>
+          <td style="font-weight:600">${c.name}</td>
+          <td style="font-size:13px">${c.email || '—'}</td>
+          <td style="font-size:13px">${c.phone || '—'}</td>
+          <td>${c.city || '—'}</td>
+          <td style="font-size:13px">${fmtDate(c.created_at)}</td>
+          <td style="display:flex;gap:6px">
+            <button class="btn btn--ghost btn--sm" data-edit="${c.id}">Düzenle</button>
+            <button class="btn btn--danger btn--sm" data-del="${c.id}">Sil</button>
+          </td>
+        </tr>
+      `).join('');
+      tbody.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openEdit(b.dataset.edit)));
+      tbody.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => del(b.dataset.del)));
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      render(all.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.email || '').toLowerCase().includes(q) ||
+        (c.phone || '').includes(q)
+      ));
+    });
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent = 'Yeni Müşteri';
+      document.getElementById('item-form').reset();
+      document.getElementById('f-id').value = '';
+      openModal('item-modal');
+    });
+
+    function openEdit(id) {
+      const c = all.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('modal-title').textContent = 'Müşteriyi Düzenle';
+      document.getElementById('f-id').value      = c.id;
+      document.getElementById('f-name').value    = c.name;
+      document.getElementById('f-email').value   = c.email || '';
+      document.getElementById('f-phone').value   = c.phone || '';
+      document.getElementById('f-address').value = c.address || '';
+      document.getElementById('f-city').value    = c.city || '';
+      openModal('item-modal');
+    }
+
+    document.getElementById('item-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const id = document.getElementById('f-id').value;
+      const payload = {
+        name:    document.getElementById('f-name').value.trim(),
+        email:   document.getElementById('f-email').value.trim() || null,
+        phone:   document.getElementById('f-phone').value.trim() || null,
+        address: document.getElementById('f-address').value.trim() || null,
+        city:    document.getElementById('f-city').value.trim() || null,
+      };
+      if (id) payload.id = id;
+      const { error } = await supabase.from('customers').upsert(payload);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast(id ? 'Müşteri güncellendi' : 'Müşteri eklendi');
+      closeModal('item-modal');
+      load();
+    });
+
+    async function del(id) {
+      if (!confirm('Bu müşteriyi silmek istediğinize emin misiniz?')) return;
+      const { error } = await supabase.from('customers').delete().eq('id', id);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast('Müşteri silindi');
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a>
+      &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Dashboard</h1>
+      <div class="topbar-actions">
+        <span id="topbar-date" style="font-size:13px;color:var(--text-muted)"></span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card stat-card--accent">
+          <div class="stat-card__label">Bugünkü Sipariş</div>
+          <div class="stat-card__value" id="stat-orders-today">—</div>
+          <div class="stat-card__sub">Online sipariş</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Aylık Ciro</div>
+          <div class="stat-card__value" id="stat-revenue">—</div>
+          <div class="stat-card__sub">Bu ay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Bekleyen Sipariş</div>
+          <div class="stat-card__value" id="stat-pending">—</div>
+          <div class="stat-card__sub">İşlem bekliyor</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Toplam Müşteri</div>
+          <div class="stat-card__value" id="stat-customers">—</div>
+          <div class="stat-card__sub">Kayıtlı müşteri</div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <strong>Son Siparişler</strong>
+          <a href="orders.html" class="btn btn--ghost btn--sm">Tümünü Gör</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sipariş No</th>
+                <th>Müşteri</th>
+                <th>Tutar</th>
+                <th>Ödeme</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders-body">
+              <tr><td colspan="6"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, fmtMoney, fmtDate } from './js/admin-common.js';
+
+    document.getElementById('topbar-date').textContent =
+      new Date().toLocaleDateString('tr-TR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+    const now       = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const todayStr   = now.toISOString().slice(0, 10);
+
+    const [ordersRes, customersRes, pendingRes] = await Promise.all([
+      supabase.from('orders').select('id,total_amount,created_at').gte('created_at', monthStart),
+      supabase.from('customers').select('id', { count: 'exact', head: true }),
+      supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    ]);
+
+    const monthOrders = ordersRes.data || [];
+    const todayOrders = monthOrders.filter(o => o.created_at.startsWith(todayStr));
+    const revenue     = monthOrders.reduce((s, o) => s + Number(o.total_amount), 0);
+
+    document.getElementById('stat-orders-today').textContent = todayOrders.length;
+    document.getElementById('stat-revenue').textContent      = fmtMoney(revenue);
+    document.getElementById('stat-pending').textContent      = pendingRes.count ?? '—';
+    document.getElementById('stat-customers').textContent    = customersRes.count ?? '—';
+
+    // Recent orders table
+    const { data: recent } = await supabase
+      .from('orders')
+      .select('id,customer_name,total_amount,payment_method,payment_status,status,created_at')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const statusBadge = s => ({
+      pending:    '<span class="badge badge--yellow">Bekliyor</span>',
+      paid:       '<span class="badge badge--green">Ödendi</span>',
+      processing: '<span class="badge badge--blue">Hazırlanıyor</span>',
+      shipped:    '<span class="badge badge--blue">Kargoda</span>',
+      delivered:  '<span class="badge badge--green">Teslim</span>',
+      cancelled:  '<span class="badge badge--red">İptal</span>',
+      refunded:   '<span class="badge badge--gray">İade</span>',
+    }[s] || `<span class="badge badge--gray">${s}</span>`);
+
+    const tbody = document.getElementById('recent-orders-body');
+    if (!recent?.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">🛒</div><div class="empty-state__text">Henüz sipariş yok</div></div></td></tr>';
+    } else {
+      tbody.innerHTML = recent.map(o => `
+        <tr>
+          <td><a href="orders.html?id=${o.id}" style="color:var(--accent);font-weight:600">#${o.id.slice(0,8).toUpperCase()}</a></td>
+          <td>${o.customer_name}</td>
+          <td>${fmtMoney(o.total_amount)}</td>
+          <td>${o.payment_method === 'iyzico' ? 'Kart' : o.payment_method === 'bank_transfer' ? 'Havale' : 'Nakit'}</td>
+          <td>${statusBadge(o.status)}</td>
+          <td>${fmtDate(o.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

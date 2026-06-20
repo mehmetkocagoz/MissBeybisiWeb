@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sipariş Alındı — MissBeybisi</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/checkout.css">
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="site-logo">Miss<span>Beybisi</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="success-main">
+    <div class="container">
+      <div class="success-card">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h1 class="success-title">Siparişiniz Alındı!</h1>
+        <p class="success-body" id="success-msg">
+          Teşekkür ederiz. Siparişiniz işleme alınmıştır.
+        </p>
+        <p class="success-order-id">Sipariş No: <strong id="order-id-display">—</strong></p>
+        <div id="bank-instructions" class="bank-info hidden">
+          <p>Ödemenizi aşağıdaki hesaba yapın, açıklamaya sipariş numaranızı yazmayı unutmayın:</p>
+          <table class="bank-table">
+            <tr><td>Banka</td><td><strong>Ziraat Bankası</strong></td></tr>
+            <tr><td>Alıcı</td><td><strong>MissBeybisi</strong></td></tr>
+            <tr><td>IBAN</td><td><strong>TR00 0000 0000 0000 0000 0000 00</strong></td></tr>
+          </table>
+        </div>
+        <a href="index.html" class="btn btn--primary" style="margin-top: 2rem;">Alışverişe Devam Et</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const params  = new URLSearchParams(location.search);
+    const orderId = params.get('id');
+    const method  = params.get('method');
+
+    if (orderId) {
+      document.getElementById('order-id-display').textContent = orderId.slice(0, 8).toUpperCase();
+    }
+    if (method === 'bank') {
+      document.getElementById('success-msg').textContent =
+        'Teşekkür ederiz. Havale/EFT ödemesi için aşağıdaki bilgileri kullanın.';
+      document.getElementById('bank-instructions').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

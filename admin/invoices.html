@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faturalar — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a> &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Faturalar</h1>
+      <div class="topbar-actions">
+        <button class="btn btn--primary" id="add-btn">+ Yeni Fatura</button>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="toolbar">
+        <input class="search-input" id="search" type="search" placeholder="Fatura no veya müşteri ara…">
+        <select id="filter-status" class="search-input" style="min-width:150px">
+          <option value="">Tüm Durumlar</option>
+          <option value="active">Aktif</option>
+          <option value="cancelled">İptal</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fatura No</th>
+                <th>Müşteri</th>
+                <th>Tarih</th>
+                <th>Toplam</th>
+                <th>Durum</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New invoice modal -->
+  <div class="modal-backdrop hidden" id="invoice-modal">
+    <div class="modal" style="max-width:700px">
+      <div class="modal__header">
+        <h2 class="modal__title">Yeni Fatura</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <form id="invoice-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fatura No</label>
+            <input type="text" id="f-no" required placeholder="FAT-2026-001">
+          </div>
+          <div class="form-group">
+            <label>Düzenleme Tarihi</label>
+            <input type="date" id="f-date" required>
+          </div>
+          <div class="form-group form-group--full">
+            <label>Müşteri</label>
+            <select id="f-customer" required></select>
+          </div>
+          <div class="form-group form-group--full">
+            <label>Müşteri Adresi</label>
+            <textarea id="f-address" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>TC / VD No</label>
+            <input type="text" id="f-tcvd">
+          </div>
+          <div class="form-group">
+            <label>Sevk Tarihi</label>
+            <input type="date" id="f-ship-date">
+          </div>
+          <div class="form-group">
+            <label>Teslim Eden</label>
+            <input type="text" id="f-delivery-by">
+          </div>
+          <div class="form-group">
+            <label>Teslim Yeri</label>
+            <input type="text" id="f-delivery-to">
+          </div>
+        </div>
+
+        <!-- Line items -->
+        <div style="margin:20px 0 8px;font-weight:700;font-size:14px">Kalemler</div>
+        <div id="line-items"></div>
+        <button type="button" class="btn btn--ghost btn--sm" id="add-line-btn" style="margin-bottom:16px">+ Kalem Ekle</button>
+
+        <div style="text-align:right;font-weight:700;font-size:15px;margin-bottom:16px">
+          Genel Toplam: <span id="grand-total-display">₺0,00</span>
+        </div>
+
+        <div class="modal__footer">
+          <button type="submit" class="btn btn--primary">Fatura Oluştur</button>
+          <button type="button" class="btn btn--ghost modal__close">İptal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Invoice detail modal -->
+  <div class="modal-backdrop hidden" id="detail-modal">
+    <div class="modal" style="max-width:680px">
+      <div class="modal__header">
+        <h2 class="modal__title" id="detail-title">Fatura Detayı</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <div id="detail-body"></div>
+      <div class="modal__footer">
+        <button class="btn btn--danger" id="cancel-invoice-btn">Faturayı İptal Et</button>
+        <button class="btn btn--ghost modal__close">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, fmtMoney, fmtDate, showToast, openModal, closeModal } from './js/admin-common.js';
+
+    let all = [], customers = [], currentInvoiceId = null;
+    let lineCount = 0;
+
+    async function load() {
+      const [invRes, custRes] = await Promise.all([
+        supabase.from('invoices').select('*, invoice_items(*)').order('created_at', { ascending: false }),
+        supabase.from('customers').select('id,name,address').order('name'),
+      ]);
+      all       = invRes.data  || [];
+      customers = custRes.data || [];
+      document.getElementById('f-customer').innerHTML = customers.map(c => `<option value="${c.id}" data-address="${c.address || ''}">${c.name}</option>`).join('');
+      render(all);
+    }
+
+    function render(rows) {
+      const tbody = document.getElementById('table-body');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">🧾</div><div class="empty-state__text">Fatura bulunamadı</div></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(inv => `
+        <tr>
+          <td style="font-weight:700;color:var(--accent)">${inv.invoice_no}</td>
+          <td>${inv.customer_name}</td>
+          <td style="font-size:13px">${fmtDate(inv.issue_date)}</td>
+          <td style="font-weight:700">${fmtMoney(inv.grand_total)}</td>
+          <td><span class="badge ${inv.cancelled ? 'badge--red' : 'badge--green'}">${inv.cancelled ? 'İptal' : 'Aktif'}</span></td>
+          <td style="display:flex;gap:6px">
+            <button class="btn btn--ghost btn--sm" data-detail="${inv.id}">Detay</button>
+            ${!inv.cancelled ? `<button class="btn btn--danger btn--sm" data-cancel="${inv.id}">İptal</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+      tbody.querySelectorAll('[data-detail]').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.detail)));
+      tbody.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => cancelInvoice(b.dataset.cancel)));
+    }
+
+    function filter() {
+      const q      = document.getElementById('search').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      return all.filter(inv =>
+        (!q      || inv.invoice_no.toLowerCase().includes(q) || inv.customer_name.toLowerCase().includes(q)) &&
+        (!status || (status === 'active' ? !inv.cancelled : inv.cancelled))
+      );
+    }
+
+    ['search','filter-status'].forEach(id =>
+      document.getElementById(id).addEventListener('input', () => render(filter()))
+    );
+
+    // Auto-fill address when customer changes
+    document.getElementById('f-customer').addEventListener('change', e => {
+      const opt = e.target.selectedOptions[0];
+      document.getElementById('f-address').value = opt?.dataset.address || '';
+    });
+
+    // Line items
+    function addLine(name = '', color = '', qty = 1, price = 0) {
+      lineCount++;
+      const id  = lineCount;
+      const div = document.createElement('div');
+      div.id = `line-${id}`;
+      div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
+      div.innerHTML = `
+        <input type="text"   class="line-name"  placeholder="Ürün adı" value="${name}"  style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
+        <input type="text"   class="line-color" placeholder="Renk"     value="${color}" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
+        <input type="number" class="line-qty"   placeholder="Adet"     value="${qty}"   min="1" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
+        <input type="number" class="line-price" placeholder="Fiyat ₺"  value="${price}" min="0" step="0.01" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
+        <button type="button" onclick="document.getElementById('line-${id}').remove();updateTotal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--danger)">×</button>
+      `;
+      div.querySelectorAll('input').forEach(i => i.addEventListener('input', updateTotal));
+      document.getElementById('line-items').appendChild(div);
+      updateTotal();
+    }
+
+    function updateTotal() {
+      let total = 0;
+      document.querySelectorAll('#line-items > div').forEach(row => {
+        const qty   = parseFloat(row.querySelector('.line-qty')?.value)   || 0;
+        const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
+        total += qty * price;
+      });
+      document.getElementById('grand-total-display').textContent = fmtMoney(total);
+    }
+
+    window.updateTotal = updateTotal;
+
+    document.getElementById('add-line-btn').addEventListener('click', () => addLine());
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+      document.getElementById('invoice-form').reset();
+      document.getElementById('line-items').innerHTML = '';
+      document.getElementById('grand-total-display').textContent = '₺0,00';
+      document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+      lineCount = 0;
+      addLine();
+      openModal('invoice-modal');
+    });
+
+    document.getElementById('invoice-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const custSel = document.getElementById('f-customer');
+      const items   = [];
+      let   total   = 0;
+
+      document.querySelectorAll('#line-items > div').forEach(row => {
+        const name  = row.querySelector('.line-name')?.value.trim();
+        const color = row.querySelector('.line-color')?.value.trim();
+        const qty   = parseInt(row.querySelector('.line-qty')?.value)    || 0;
+        const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
+        if (name && qty > 0) {
+          const lineTotal = qty * price;
+          items.push({ product_name: name, color: color || null, quantity: qty, unit_price: price, total: lineTotal });
+          total += lineTotal;
+        }
+      });
+
+      if (!items.length) { showToast('En az bir kalem ekleyin'); return; }
+
+      const invoice = {
+        invoice_no:       document.getElementById('f-no').value.trim(),
+        customer_id:      custSel.value,
+        customer_name:    custSel.selectedOptions[0].text,
+        customer_address: document.getElementById('f-address').value.trim() || null,
+        tc_vd:            document.getElementById('f-tcvd').value.trim() || null,
+        issue_date:       document.getElementById('f-date').value,
+        ship_date:        document.getElementById('f-ship-date').value || null,
+        delivery_by:      document.getElementById('f-delivery-by').value.trim() || null,
+        delivery_to:      document.getElementById('f-delivery-to').value.trim() || null,
+        grand_total:      total,
+      };
+
+      const { data: inv, error: invErr } = await supabase.from('invoices').insert(invoice).select().single();
+      if (invErr) { showToast('Hata: ' + invErr.message); return; }
+
+      const rows = items.map(it => ({ ...it, invoice_id: inv.id }));
+      const { error: itemErr } = await supabase.from('invoice_items').insert(rows);
+      if (itemErr) { showToast('Kalem hatası: ' + itemErr.message); return; }
+
+      showToast('Fatura oluşturuldu');
+      closeModal('invoice-modal');
+      load();
+    });
+
+    function openDetail(id) {
+      const inv = all.find(x => x.id === id);
+      if (!inv) return;
+      currentInvoiceId = id;
+      document.getElementById('detail-title').textContent = `Fatura ${inv.invoice_no}`;
+      document.getElementById('cancel-invoice-btn').style.display = inv.cancelled ? 'none' : '';
+
+      const items = (inv.invoice_items || []).map(it => `
+        <tr>
+          <td style="padding:6px 8px">${it.product_name}</td>
+          <td style="padding:6px 8px">${it.color || '—'}</td>
+          <td style="padding:6px 8px">${it.quantity}</td>
+          <td style="padding:6px 8px">${fmtMoney(it.unit_price)}</td>
+          <td style="padding:6px 8px;font-weight:700">${fmtMoney(it.total)}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('detail-body').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;margin-bottom:20px">
+          <div><strong>Müşteri:</strong> ${inv.customer_name}</div>
+          <div><strong>Tarih:</strong> ${fmtDate(inv.issue_date)}</div>
+          ${inv.customer_address ? `<div style="grid-column:1/-1"><strong>Adres:</strong> ${inv.customer_address}</div>` : ''}
+          ${inv.tc_vd ? `<div><strong>TC/VD:</strong> ${inv.tc_vd}</div>` : ''}
+          ${inv.ship_date ? `<div><strong>Sevk:</strong> ${fmtDate(inv.ship_date)}</div>` : ''}
+          ${inv.delivery_by ? `<div><strong>Teslim Eden:</strong> ${inv.delivery_by}</div>` : ''}
+          ${inv.delivery_to ? `<div><strong>Teslim Yeri:</strong> ${inv.delivery_to}</div>` : ''}
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:6px 8px;text-align:left">Ürün</th>
+            <th style="padding:6px 8px;text-align:left">Renk</th>
+            <th style="padding:6px 8px;text-align:left">Adet</th>
+            <th style="padding:6px 8px;text-align:left">Birim</th>
+            <th style="padding:6px 8px;text-align:left">Toplam</th>
+          </tr></thead>
+          <tbody>${items}</tbody>
+          <tfoot><tr style="border-top:2px solid var(--border)">
+            <td colspan="4" style="padding:8px;text-align:right;font-weight:700">Genel Toplam:</td>
+            <td style="padding:8px;font-weight:800;font-size:15px">${fmtMoney(inv.grand_total)}</td>
+          </tr></tfoot>
+        </table>
+        ${inv.cancelled ? '<p style="color:var(--danger);font-weight:700;margin-top:16px">⚠️ Bu fatura iptal edilmiştir.</p>' : ''}
+      `;
+      openModal('detail-modal');
+    }
+
+    document.getElementById('cancel-invoice-btn').addEventListener('click', () => cancelInvoice(currentInvoiceId, true));
+
+    async function cancelInvoice(id, fromModal = false) {
+      if (!confirm('Bu faturayı iptal etmek istediğinize emin misiniz?')) return;
+      const { error } = await supabase.from('invoices').update({ cancelled: true }).eq('id', id);
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast('Fatura iptal edildi');
+      if (fromModal) closeModal('detail-modal');
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

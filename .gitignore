@@ -1,0 +1,23 @@
+# Environment — never commit real secrets
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Node (in case you add a build step or Edge Functions later)
+node_modules/
+dist/
+.vercel/
+
+# Supabase CLI local files
+supabase/.temp/
+supabase/functions/.env

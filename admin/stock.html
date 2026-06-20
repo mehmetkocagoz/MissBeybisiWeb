@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stok — MissBeybisi Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-logo">Miss<span>Beybisi</span><span class="sidebar-subtitle">Admin</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Genel</div>
+      <a href="index.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
+      <div class="nav-section-label">Katalog</div>
+      <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
+      <div class="nav-section-label">Muhasebe</div>
+      <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
+      <a href="payments.html"><span class="nav-icon">💳</span> Ödemeler</a>
+      <a href="invoices.html"><span class="nav-icon">🧾</span> Faturalar</a>
+      <div class="nav-section-label">Kişiler</div>
+      <a href="customers.html"><span class="nav-icon">👥</span> Müşteriler</a>
+      <a href="suppliers.html"><span class="nav-icon">🏭</span> Tedarikçiler</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../index.html" target="_blank">Siteyi Gör ↗</a> &nbsp;·&nbsp;
+      <a href="#" id="signout-btn">Çıkış</a>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>Stok Yönetimi</h1>
+      <div class="topbar-actions">
+        <button class="btn btn--primary" id="add-stock-btn">+ Stok Ekle / Güncelle</button>
+      </div>
+    </div>
+    <div class="admin-content">
+      <div class="toolbar">
+        <input class="search-input" id="search" type="search" placeholder="Ürün ara…">
+        <select id="filter-product" class="search-input" style="min-width:200px">
+          <option value="">Tüm Ürünler</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ürün</th>
+                <th>Renk</th>
+                <th>Beden</th>
+                <th>Stok</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="stock-body">
+              <tr><td colspan="5"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock modal -->
+  <div class="modal-backdrop hidden" id="stock-modal">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="stock-modal-title">Stok Ekle / Güncelle</h2>
+        <button class="modal__close">×</button>
+      </div>
+      <form id="stock-form">
+        <input type="hidden" id="s-id">
+        <div class="form-grid">
+          <div class="form-group form-group--full">
+            <label>Ürün</label>
+            <select id="s-product" required></select>
+          </div>
+          <div class="form-group">
+            <label>Renk</label>
+            <input type="text" id="s-color" required placeholder="Pembe">
+          </div>
+          <div class="form-group">
+            <label>Beden</label>
+            <input type="text" id="s-size" required placeholder="3 Yaş">
+          </div>
+          <div class="form-group form-group--full">
+            <label>Adet</label>
+            <input type="number" id="s-quantity" min="0" required value="0">
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="submit" class="btn btn--primary">Kaydet</button>
+          <button type="button" class="btn btn--ghost modal__close">İptal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin-toast"></div>
+
+  <script type="module">
+    import { supabase, showToast, openModal, closeModal } from './js/admin-common.js';
+
+    let allStock = [];
+    let products = [];
+
+    async function load() {
+      const [stockRes, prodRes] = await Promise.all([
+        supabase.from('stock').select('*, products(name)').order('created_at', { ascending: false }),
+        supabase.from('products').select('id,name').eq('active', true).order('name'),
+      ]);
+      allStock = stockRes.data || [];
+      products = prodRes.data || [];
+
+      const sel = document.getElementById('filter-product');
+      const sSel = document.getElementById('s-product');
+      const opts = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      sel.innerHTML  = '<option value="">Tüm Ürünler</option>' + opts;
+      sSel.innerHTML = opts;
+
+      render(allStock);
+    }
+
+    function render(rows) {
+      const tbody = document.getElementById('stock-body');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__text">Stok kaydı bulunamadı</div></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(s => `
+        <tr>
+          <td style="font-weight:600">${s.products?.name || '—'}</td>
+          <td>${s.color}</td>
+          <td>${s.size}</td>
+          <td>
+            <span class="badge ${s.quantity === 0 ? 'badge--red' : s.quantity < 5 ? 'badge--yellow' : 'badge--green'}">
+              ${s.quantity}
+            </span>
+          </td>
+          <td><button class="btn btn--ghost btn--sm" data-edit="${s.id}">Düzenle</button></td>
+        </tr>
+      `).join('');
+      tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openEdit(btn.dataset.edit)));
+    }
+
+    function filter() {
+      const q    = document.getElementById('search').value.toLowerCase();
+      const prod = document.getElementById('filter-product').value;
+      return allStock.filter(s =>
+        (!q    || (s.products?.name || '').toLowerCase().includes(q) || s.color.toLowerCase().includes(q)) &&
+        (!prod || s.product_id === prod)
+      );
+    }
+
+    document.getElementById('search').addEventListener('input', () => render(filter()));
+    document.getElementById('filter-product').addEventListener('change', () => render(filter()));
+
+    document.getElementById('add-stock-btn').addEventListener('click', () => {
+      document.getElementById('stock-modal-title').textContent = 'Stok Ekle / Güncelle';
+      document.getElementById('stock-form').reset();
+      document.getElementById('s-id').value = '';
+      openModal('stock-modal');
+    });
+
+    function openEdit(id) {
+      const s = allStock.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('stock-modal-title').textContent = 'Stok Düzenle';
+      document.getElementById('s-id').value       = s.id;
+      document.getElementById('s-product').value  = s.product_id;
+      document.getElementById('s-color').value    = s.color;
+      document.getElementById('s-size').value     = s.size;
+      document.getElementById('s-quantity').value = s.quantity;
+      openModal('stock-modal');
+    }
+
+    document.getElementById('stock-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const id = document.getElementById('s-id').value;
+      const payload = {
+        product_id: document.getElementById('s-product').value,
+        color:      document.getElementById('s-color').value.trim(),
+        size:       document.getElementById('s-size').value.trim(),
+        quantity:   parseInt(document.getElementById('s-quantity').value),
+      };
+      if (id) payload.id = id;
+
+      const { error } = await supabase
+        .from('stock')
+        .upsert(payload, { onConflict: 'product_id,color,size' });
+      if (error) { showToast('Hata: ' + error.message); return; }
+      showToast('Stok güncellendi');
+      closeModal('stock-modal');
+      load();
+    });
+
+    load();
+  </script>
+</body>
+</html>

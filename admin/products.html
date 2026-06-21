@@ -127,6 +127,11 @@
             <input type="text" id="p-sizes" placeholder="2 Yaş, 3 Yaş, 4 Yaş">
           </div>
           <div class="form-group form-group--full">
+            <label>Görseller</label>
+            <input type="file" id="p-images-upload" accept="image/*" multiple>
+            <div id="p-images-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+          </div>
+          <div class="form-group form-group--full">
             <label>Açıklama</label>
             <textarea id="p-description" rows="3"></textarea>
           </div>
@@ -155,6 +160,41 @@
     import { supabase, fmtMoney, showToast, openModal, closeModal } from './js/admin-common.js';
 
     let allProducts = [];
+    let currentImages = [];
+
+    function imgPreviewSrc(value) {
+      return /^https?:\/\//i.test(value) ? value : `../photos/${value.replace(/ /g, '%20')}`;
+    }
+
+    function renderImagePreview() {
+      const wrap = document.getElementById('p-images-preview');
+      wrap.innerHTML = currentImages.map((value, i) => `
+        <div style="position:relative">
+          <img src="${imgPreviewSrc(value)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+          <button type="button" data-remove-img="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button>
+        </div>
+      `).join('');
+      wrap.querySelectorAll('[data-remove-img]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentImages.splice(parseInt(btn.dataset.removeImg), 1);
+          renderImagePreview();
+        });
+      });
+    }
+
+    document.getElementById('p-images-upload').addEventListener('change', async e => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      for (const file of files) {
+        const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const { error } = await supabase.storage.from('product-images').upload(path, file);
+        if (error) { showToast('Yükleme hatası: ' + error.message); continue; }
+        const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+        currentImages.push(data.publicUrl);
+      }
+      renderImagePreview();
+      e.target.value = '';
+    });
 
     async function load() {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
@@ -221,6 +261,8 @@
       document.getElementById('product-modal-title').textContent = 'Yeni Ürün';
       document.getElementById('product-form').reset();
       document.getElementById('p-id').value = '';
+      currentImages = [];
+      renderImagePreview();
       openModal('product-modal');
     });
 
@@ -240,6 +282,8 @@
       document.getElementById('p-description').value   = p.description || '';
       document.getElementById('p-featured').checked    = p.featured;
       document.getElementById('p-is-new').checked      = p.is_new;
+      currentImages = [...(p.images || [])];
+      renderImagePreview();
       openModal('product-modal');
     }
 
@@ -255,6 +299,7 @@
         age_group:      document.getElementById('p-age-group').value,
         colors:         document.getElementById('p-colors').value.split(',').map(s => s.trim()).filter(Boolean),
         sizes:          document.getElementById('p-sizes').value.split(',').map(s => s.trim()).filter(Boolean),
+        images:         currentImages,
         description:    document.getElementById('p-description').value.trim(),
         featured:       document.getElementById('p-featured').checked,
         is_new:         document.getElementById('p-is-new').checked,

@@ -1,6 +1,8 @@
 // MissBeybisi — Shared utilities loaded on every page
 
 function imgSrc(filename) {
+  if (!filename) return '';
+  if (/^https?:\/\//i.test(filename)) return filename;
   return 'photos/' + filename.replace(/ /g, '%20');
 }
 

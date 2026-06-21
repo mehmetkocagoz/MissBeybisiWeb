@@ -223,6 +223,24 @@ create trigger orders_updated_at
   before update on orders
   for each row execute procedure set_updated_at();
 
+-- ── Storage bucket for product images ─────────────────────────────────────────
+-- Create a public bucket so uploaded product photos can be served directly.
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
+
+create policy "public read product-images"
+  on storage.objects for select
+  using (bucket_id = 'product-images');
+
+create policy "admin upload product-images"
+  on storage.objects for insert
+  with check (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
+create policy "admin delete product-images"
+  on storage.objects for delete
+  using (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
 -- ── Useful views ──────────────────────────────────────────────────────────────
 create or replace view stock_summary as
 select

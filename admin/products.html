@@ -162,15 +162,11 @@
     let allProducts = [];
     let currentImages = [];
 
-    function imgPreviewSrc(value) {
-      return /^https?:\/\//i.test(value) ? value : `../photos/${value.replace(/ /g, '%20')}`;
-    }
-
     function renderImagePreview() {
       const wrap = document.getElementById('p-images-preview');
-      wrap.innerHTML = currentImages.map((value, i) => `
+      wrap.innerHTML = currentImages.map((url, i) => `
         <div style="position:relative">
-          <img src="${imgPreviewSrc(value)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+          <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
           <button type="button" data-remove-img="${i}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button>
         </div>
       `).join('');

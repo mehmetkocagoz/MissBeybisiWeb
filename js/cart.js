@@ -15,19 +15,20 @@ const Cart = (() => {
 
   function getItems() { return load(); }
 
-  function addItem(product, size, quantity = 1) {
+  function addItem(product, color, size, quantity = 1) {
     const items = load();
-    const key = `${product.id}_${size}`;
+    const key = `${product.id}_${color}_${size}`;
     const existing = items.find(i => i.key === key);
     if (existing) {
       existing.quantity += quantity;
     } else {
       items.push({
         key,
-        id: product.id,
+        productId: product.id,
         name: product.name,
         slug: product.slug,
         price: product.price,
+        color,
         size,
         quantity,
         image: product.images[0]

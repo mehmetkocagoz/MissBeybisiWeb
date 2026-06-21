@@ -19,7 +19,7 @@ function createProductCard(product, rootPrefix = '') {
         ${product.isNew ? `<span class="badge badge--new">Yeni</span>` : ''}
         <div class="product-card__actions">
           <button class="product-card__quick-add btn btn--primary btn--sm"
-            data-id="${product.id}" data-size="${product.sizes[0]}">
+            data-id="${product.id}" data-color="${product.colors[0]}" data-size="${product.sizes[0]}">
             Sepete Ekle
           </button>
         </div>
@@ -38,23 +38,29 @@ function createProductCard(product, rootPrefix = '') {
   `;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function bindQuickAdd(grid) {
+  grid.querySelectorAll('.product-card__quick-add').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const product = getProductById(btn.dataset.id);
+      if (product) {
+        Cart.addItem(product, btn.dataset.color, btn.dataset.size);
+        showToast(`${product.name} sepete eklendi!`);
+        updateCartBadge();
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.productsReady;
+
   // Featured products
   const featuredGrid = document.getElementById('featured-grid');
   if (featuredGrid) {
     const featured = getFeaturedProducts().slice(0, 8);
     featuredGrid.innerHTML = featured.map(p => createProductCard(p)).join('');
-    featuredGrid.querySelectorAll('.product-card__quick-add').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const product = getProductById(parseInt(btn.dataset.id));
-        if (product) {
-          Cart.addItem(product, btn.dataset.size);
-          showToast(`${product.name} sepete eklendi!`);
-          updateCartBadge();
-        }
-      });
-    });
+    bindQuickAdd(featuredGrid);
   }
 
   // New arrivals ticker
@@ -62,16 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newGrid) {
     const newProducts = getNewProducts().slice(0, 4);
     newGrid.innerHTML = newProducts.map(p => createProductCard(p)).join('');
-    newGrid.querySelectorAll('.product-card__quick-add').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const product = getProductById(parseInt(btn.dataset.id));
-        if (product) {
-          Cart.addItem(product, btn.dataset.size);
-          showToast(`${product.name} sepete eklendi!`);
-          updateCartBadge();
-        }
-      });
-    });
+    bindQuickAdd(newGrid);
   }
 });

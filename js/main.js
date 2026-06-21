@@ -73,7 +73,7 @@ function renderCartDrawer() {
       <img src="${imgSrc(item.image)}" alt="${item.name}" class="cart-item__img">
       <div class="cart-item__info">
         <p class="cart-item__name">${item.name}</p>
-        <p class="cart-item__meta">Beden: ${item.size}</p>
+        <p class="cart-item__meta">Renk: ${item.color} · Beden: ${item.size}</p>
         <p class="cart-item__price">${formatPrice(item.price)}</p>
         <div class="cart-item__qty">
           <button class="qty-btn qty-dec" data-key="${item.key}">−</button>
@@ -91,7 +91,7 @@ function renderCartDrawer() {
       <strong>${formatPrice(Cart.getTotal())}</strong>
     </div>
     <p class="cart-shipping-note">Kargo ve vergi hesaplama ödeme adımında yapılır.</p>
-    <button class="btn btn--primary btn--full" onclick="alert('Ödeme sayfası yakında!')">Ödemeye Geç</button>
+    <a class="btn btn--primary btn--full" href="checkout.html">Ödemeye Geç</a>
     <button class="btn btn--ghost btn--full" onclick="Cart.clear(); renderCartDrawer(); updateCartBadge();">Sepeti Temizle</button>
   `;
 

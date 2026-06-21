@@ -1,6 +1,8 @@
 // MissBeybisi — Product Detail Page
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.productsReady;
+
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
   const product = getProductBySlug(slug);
@@ -166,8 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add to cart
   document.getElementById('add-to-cart').addEventListener('click', () => {
     const qty = parseInt(qtyInput.value) || 1;
-    Cart.addItem(product, selectedSize, qty);
-    showToast(`${product.name} (${selectedSize}) sepete eklendi!`);
+    Cart.addItem(product, selectedColor, selectedSize, qty);
+    showToast(`${product.name} (${selectedColor}, ${selectedSize}) sepete eklendi!`);
     updateCartBadge();
     openCartDrawer();
   });

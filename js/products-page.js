@@ -38,7 +38,7 @@ function renderGrid(products) {
           ${product.isNew ? `<span class="badge badge--new">Yeni</span>` : ''}
           <div class="product-card__actions">
             <button class="product-card__quick-add btn btn--primary btn--sm"
-              data-id="${product.id}" data-size="${product.sizes[0]}">
+              data-id="${product.id}" data-color="${product.colors[0]}" data-size="${product.sizes[0]}">
               Sepete Ekle
             </button>
           </div>
@@ -60,9 +60,9 @@ function renderGrid(products) {
   grid.querySelectorAll('.product-card__quick-add').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
-      const product = getProductById(parseInt(btn.dataset.id));
+      const product = getProductById(btn.dataset.id);
       if (product) {
-        Cart.addItem(product, btn.dataset.size);
+        Cart.addItem(product, btn.dataset.color, btn.dataset.size);
         showToast(`${product.name} sepete eklendi!`);
         updateCartBadge();
       }
@@ -100,7 +100,9 @@ function resetFilters() {
   applyFilters();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.productsReady;
+
   // Read URL params
   const params = new URLSearchParams(window.location.search);
   if (params.get('category')) currentFilters.category = params.get('category');

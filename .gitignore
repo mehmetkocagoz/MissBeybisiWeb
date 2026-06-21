@@ -21,3 +21,4 @@ dist/
 # Supabase CLI local files
 supabase/.temp/
 supabase/functions/.env
+*.sql

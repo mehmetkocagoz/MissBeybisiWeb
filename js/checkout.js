@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Cart helpers ──────────────────────────────────────────────────────────────
 
 function loadCart() {
-  try { return JSON.parse(localStorage.getItem('mb_cart') || '[]'); }
+  try { return JSON.parse(localStorage.getItem('missbeybisi_cart') || '[]'); }
   catch { return []; }
 }
 
@@ -185,7 +185,7 @@ function bindBankConfirm() {
         },
         buildOrderItems()
       );
-      localStorage.removeItem('mb_cart');
+      localStorage.removeItem('missbeybisi_cart');
       window.location.href = `order-success.html?id=${createdOrder.id}&method=bank`;
     } catch (err) {
       btn.disabled = false;

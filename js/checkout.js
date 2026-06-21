@@ -68,11 +68,27 @@ function renderSummary() {
 
 // ── Step 1: Customer info form ────────────────────────────────────────────────
 
+function isValidTcKimlikNo(value) {
+  if (!/^[1-9][0-9]{10}$/.test(value)) return false;
+  const digits = value.split('').map(Number);
+  const oddSum  = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
+  const evenSum = digits[1] + digits[3] + digits[5] + digits[7];
+  const digit10 = ((oddSum * 7) - evenSum) % 10;
+  const digit11 = (digits.slice(0, 10).reduce((s, d) => s + d, 0)) % 10;
+  return digit10 === digits[9] && digit11 === digits[10];
+}
+
 function bindInfoForm() {
   document.getElementById('info-form').addEventListener('submit', e => {
     e.preventDefault();
     const fd = new FormData(e.target);
     customerInfo = Object.fromEntries(fd.entries());
+
+    if (!isValidTcKimlikNo(customerInfo.identityNumber || '')) {
+      alert('Lütfen geçerli bir TC Kimlik Numarası girin.');
+      return;
+    }
+
     goToPayment();
   });
 }
@@ -224,14 +240,23 @@ function buildOrderItems() {
   }));
 }
 
+function normalizePhone(phone) {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (digits.startsWith('90') && digits.length === 12) return `+${digits}`;
+  if (digits.startsWith('0') && digits.length === 11) return `+90${digits.slice(1)}`;
+  if (digits.length === 10) return `+90${digits}`;
+  return `+90${digits}`;
+}
+
 function buildOrderPayload(method) {
   return {
     customer: {
-      name:    `${customerInfo.firstName} ${customerInfo.lastName}`,
-      email:   customerInfo.email,
-      phone:   customerInfo.phone,
-      address: customerInfo.address,
-      city:    customerInfo.city,
+      name:           `${customerInfo.firstName} ${customerInfo.lastName}`,
+      email:           customerInfo.email,
+      phone:           normalizePhone(customerInfo.phone),
+      identityNumber:  customerInfo.identityNumber,
+      address:         customerInfo.address,
+      city:            customerInfo.city,
     },
     items: buildOrderItems(),
     subtotal: cartSubtotal(),

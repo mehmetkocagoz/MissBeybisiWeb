@@ -34,8 +34,7 @@ function renderSiteFooter() {
             <a href="index.html" class="site-logo">Miss<span>Beybisi</span></a>
             <p>Küçük prensesler için özenle tasarlanmış kız çocuk elbiseleri.</p>
             <div class="iyzico-badge">
-              <img src="https://www.iyzico.com/assets/images/iyzico-logo.svg" alt="İyzico" onerror="this.style.display='none'">
-              <span>Güvenli ödeme altyapısı</span>
+              <img src="images/iyzico/logo_band_colored.svg" alt="İyzico ile güvenli ödeme">
             </div>
           </div>
           <div>
@@ -52,6 +51,7 @@ function renderSiteFooter() {
           <div>
             <h4 class="footer-heading">Bilgi</h4>
             <ul class="footer-links">
+              <li><a href="hakkimizda.html">Hakkımızda</a></li>
               <li><a href="iletisim.html">İletişim</a></li>
             </ul>
           </div>

@@ -57,6 +57,15 @@
                 <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="05xx xxx xx xx">
               </div>
               <div class="form-group">
+                <label for="identity-number">TC Kimlik No</label>
+                <input type="text" id="identity-number" name="identityNumber" required
+                  inputmode="numeric" pattern="[0-9]{11}" maxlength="11" minlength="11"
+                  placeholder="11 haneli TC Kimlik Numaranız">
+                <small style="color:#888;font-size:12px">
+                  Ödeme güvenliği için (İyzico) yasal olarak zorunludur, yalnızca ödeme işleminde kullanılır.
+                </small>
+              </div>
+              <div class="form-group">
                 <label for="address">Adres</label>
                 <textarea id="address" name="address" rows="3" required autocomplete="street-address"></textarea>
               </div>
@@ -86,7 +95,7 @@
               <label class="payment-method-option">
                 <input type="radio" name="paymentMethod" value="iyzico" checked>
                 <span class="payment-method-label">
-                  <img src="https://www.iyzico.com/assets/images/iyzico-logo.svg" alt="İyzico" height="24" onerror="this.style.display='none'">
+                  <img src="images/iyzico/iyzico_ile_ode_colored.svg" alt="İyzico" height="24">
                   Kredi / Banka Kartı
                   <span class="payment-method-sub">İyzico güvencesiyle güvenli ödeme</span>
                 </span>
@@ -126,8 +135,7 @@
             <button class="btn btn--primary btn--full" id="confirm-bank-btn" style="display:none">Siparişi Onayla</button>
 
             <div class="iyzico-badge" style="justify-content:center;margin-top:14px">
-              <img src="https://www.iyzico.com/assets/images/iyzico-logo.svg" alt="İyzico" onerror="this.style.display='none'">
-              <span>256-bit SSL ile güvenli ödeme</span>
+              <img src="images/iyzico/iyzico_ile_ode_colored.svg" alt="İyzico ile öde" style="height:32px">
             </div>
 
             <button class="btn btn--ghost" id="back-to-info">← Bilgilere Dön</button>

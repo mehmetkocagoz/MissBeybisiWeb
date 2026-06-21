@@ -55,6 +55,11 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
     }
+    if (!/^[1-9][0-9]{10}$/.test(customer.identityNumber || '')) {
+      return new Response(JSON.stringify({ error: 'Geçersiz TC Kimlik No' }), {
+        status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -95,9 +100,9 @@ Deno.serve(async (req) => {
         id: orderId,
         name,
         surname,
-        gsmNumber: customer.phone || '+905000000000',
+        gsmNumber: customer.phone,
         email: customer.email,
-        identityNumber: '11111111111',
+        identityNumber: customer.identityNumber,
         registrationAddress: customer.address,
         city: customer.city,
         country: 'Turkey',
@@ -116,7 +121,7 @@ Deno.serve(async (req) => {
         address: customer.address,
       },
       basketItems: items.map((it: any, i: number) => ({
-        id: it.product_id || `item-${i}`,
+        id: `${it.product_id || 'item'}-${i}`,
         name: it.product_name,
         category1: 'Çocuk Giyim',
         itemType: 'PHYSICAL',

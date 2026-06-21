@@ -82,7 +82,18 @@ function goToPayment() {
   document.getElementById('step-pay').classList.remove('hidden');
   document.getElementById('step-pay-label').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  initPayment();
+
+  document.getElementById('iyzico-checkout-form').innerHTML =
+    '<p class="iyzico-loading">Ödeme formunu görüntülemek için lütfen aşağıdaki sözleşmeyi onaylayın.</p>';
+
+  let iyzicoLoaded = false;
+  document.getElementById('legal-consent').addEventListener('change', e => {
+    const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    if (e.target.checked && method === 'iyzico' && !iyzicoLoaded) {
+      iyzicoLoaded = true;
+      loadIyzicoForm();
+    }
+  });
 }
 
 function bindBackButton() {
@@ -101,14 +112,16 @@ function bindPaymentToggle() {
       const method = radio.value;
       document.getElementById('iyzico-checkout-form').classList.toggle('hidden', method !== 'iyzico');
       document.getElementById('bank-transfer-info').classList.toggle('hidden', method !== 'bank_transfer');
+      document.getElementById('confirm-bank-btn').style.display = method === 'bank_transfer' ? '' : 'none';
       if (method === 'bank_transfer') bindBankConfirm();
     });
   });
 }
 
-function initPayment() {
-  const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-  if (method === 'iyzico') loadIyzicoForm();
+function hasLegalConsent() {
+  const checked = document.getElementById('legal-consent').checked;
+  if (!checked) alert('Lütfen Mesafeli Satış Sözleşmesi ve Cayma Hakkı bilgilendirmesini onaylayın.');
+  return checked;
 }
 
 // ── İyzico Checkout Form ──────────────────────────────────────────────────────
@@ -142,8 +155,9 @@ async function loadIyzicoForm() {
       buildOrderItems()
     );
 
-    // 2. Call your backend to get İyzico token
-    const res = await fetch('/api/iyzico-init', {
+    // 2. Call the Supabase Edge Function to get an İyzico Checkout Form token
+    const { IYZICO_INIT_URL } = await import('./config.js');
+    const res = await fetch(IYZICO_INIT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: createdOrder.id, ...order }),
@@ -168,6 +182,7 @@ async function loadIyzicoForm() {
 function bindBankConfirm() {
   const btn = document.getElementById('confirm-bank-btn');
   btn.onclick = async () => {
+    if (!hasLegalConsent()) return;
     btn.disabled = true;
     btn.textContent = 'Sipariş oluşturuluyor…';
     try {

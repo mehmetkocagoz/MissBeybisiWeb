@@ -6,3 +6,6 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // İyzico — handled server-side only (never expose secret key in frontend).
 // Set IYZICO_BASE_URL to https://api.iyzipay.com for production.
 export const IYZICO_BASE_URL = 'https://sandbox-api.iyzipay.com';
+
+// Supabase Edge Function that initializes the İyzico Checkout Form.
+export const IYZICO_INIT_URL = `${SUPABASE_URL}/functions/v1/iyzico-init`;

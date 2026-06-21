@@ -6,6 +6,7 @@
   <title>Ödeme — MissBeybisi</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/legal.css">
 </head>
 <body>
 
@@ -112,7 +113,21 @@
                 <tr><td>Alıcı</td><td><strong>MissBeybisi</strong></td></tr>
                 <tr><td>IBAN</td><td><strong id="bank-iban">TR00 0000 0000 0000 0000 0000 00</strong></td></tr>
               </table>
-              <button class="btn btn--primary btn--full" id="confirm-bank-btn">Siparişi Onayla</button>
+            </div>
+
+            <label class="consent-row">
+              <input type="checkbox" id="legal-consent" required>
+              <span>
+                <a href="mesafeli-satis-sozlesmesi.html" target="_blank">Mesafeli Satış Sözleşmesi'ni</a> ve
+                <a href="iade-ve-cayma-hakki.html" target="_blank">Cayma Hakkı bilgilendirmesini</a> okudum, kabul ediyorum.
+              </span>
+            </label>
+
+            <button class="btn btn--primary btn--full" id="confirm-bank-btn" style="display:none">Siparişi Onayla</button>
+
+            <div class="iyzico-badge" style="justify-content:center;margin-top:14px">
+              <img src="https://www.iyzico.com/assets/images/iyzico-logo.svg" alt="İyzico" onerror="this.style.display='none'">
+              <span>256-bit SSL ile güvenli ödeme</span>
             </div>
 
             <button class="btn btn--ghost" id="back-to-info">← Bilgilere Dön</button>

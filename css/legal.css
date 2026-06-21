@@ -1,0 +1,68 @@
+/* Legal / info pages */
+.legal-main { padding: 48px 0 80px; }
+.legal-content {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text, #1a1a1a);
+}
+.legal-content h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.legal-content .legal-updated { color: #888; font-size: 13px; margin-bottom: 32px; }
+.legal-content h2 { font-size: 18px; font-weight: 700; margin: 32px 0 12px; }
+.legal-content h3 { font-size: 15px; font-weight: 700; margin: 20px 0 8px; }
+.legal-content p { margin-bottom: 14px; }
+.legal-content ul, .legal-content ol { margin: 0 0 14px 20px; }
+.legal-content li { margin-bottom: 6px; }
+.legal-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+.legal-content table td, .legal-content table th { border: 1px solid #e5e5e5; padding: 8px 12px; text-align: left; }
+.legal-content .fill-in { background: #fff3cd; padding: 1px 6px; border-radius: 4px; color: #92400e; font-weight: 600; }
+.legal-content a { color: var(--accent, #e07); }
+
+/* Cookie consent banner */
+#cookie-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+}
+#cookie-banner.hidden { display: none; }
+#cookie-banner p { font-size: 13px; margin: 0; flex: 1; min-width: 240px; }
+#cookie-banner a { color: #ffb3d9; text-decoration: underline; }
+#cookie-banner .cookie-actions { display: flex; gap: 10px; flex-shrink: 0; }
+#cookie-banner button {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+}
+#cookie-banner .cookie-accept { background: #e07; color: #fff; }
+#cookie-banner .cookie-decline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3); }
+
+/* İyzico trust badge */
+.iyzico-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #888;
+}
+.iyzico-badge img { height: 20px; }
+
+/* Checkout consent checkbox */
+.consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  margin: 16px 0;
+  color: #555;
+}
+.consent-row input { margin-top: 3px; accent-color: var(--accent, #e07); flex-shrink: 0; }
+.consent-row a { color: var(--accent, #e07); font-weight: 600; }

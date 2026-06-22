@@ -105,12 +105,13 @@
           </div>
           <div class="form-group">
             <label>Renk</label>
-            <input type="text" id="f-color" required>
+            <select id="f-color" required><option value="">Önce ürün seçin</option></select>
           </div>
           <div class="form-group">
             <label>Beden</label>
-            <input type="text" id="f-size">
+            <select id="f-size" required><option value="">Önce renk seçin</option></select>
           </div>
+          <div class="form-group form-group--full" id="stock-info" style="margin-top:-8px"></div>
           <div class="form-group">
             <label>Adet</label>
             <input type="number" id="f-qty" min="1" value="1" required>
@@ -150,6 +151,63 @@
     import { supabase, fmtMoney, fmtDate, showToast, openModal, closeModal } from './js/admin-common.js';
 
     let all = [];
+    let currentStock = []; // stock rows (quantity > 0) for the currently selected product
+
+    async function loadStockForProduct(productId) {
+      const colorSel = document.getElementById('f-color');
+      const sizeSel  = document.getElementById('f-size');
+      const stockInfo = document.getElementById('stock-info');
+
+      colorSel.innerHTML = '<option value="">Yükleniyor…</option>';
+      sizeSel.innerHTML  = '<option value="">—</option>';
+      stockInfo.textContent = '';
+
+      if (!productId) {
+        colorSel.innerHTML = '<option value="">Önce ürün seçin</option>';
+        currentStock = [];
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('stock')
+        .select('color, size, quantity')
+        .eq('product_id', productId)
+        .gt('quantity', 0);
+
+      currentStock = data || [];
+
+      if (error || !currentStock.length) {
+        colorSel.innerHTML = '<option value="">Stokta renk/beden yok</option>';
+        sizeSel.innerHTML  = '<option value="">—</option>';
+        return;
+      }
+
+      const colors = [...new Set(currentStock.map(s => s.color))];
+      colorSel.innerHTML = '<option value="">Renk seçin</option>' +
+        colors.map(c => `<option value="${c}">${c}</option>`).join('');
+      sizeSel.innerHTML = '<option value="">Önce renk seçin</option>';
+    }
+
+    function updateSizesForColor(color) {
+      const sizeSel = document.getElementById('f-size');
+      const sizes = currentStock.filter(s => s.color === color);
+      if (!color || !sizes.length) {
+        sizeSel.innerHTML = '<option value="">—</option>';
+        return;
+      }
+      sizeSel.innerHTML = '<option value="">Beden seçin</option>' +
+        sizes.map(s => `<option value="${s.size}" data-qty="${s.quantity}">${s.size} (Stok: ${s.quantity})</option>`).join('');
+    }
+
+    function updateStockInfo() {
+      const sizeSel = document.getElementById('f-size');
+      const opt = sizeSel.selectedOptions[0];
+      const stockInfo = document.getElementById('stock-info');
+      const qty = opt?.dataset.qty;
+      stockInfo.textContent = qty ? `Mevcut stok: ${qty} adet` : '';
+      const qtyInput = document.getElementById('f-qty');
+      if (qty) qtyInput.max = qty;
+    }
 
     async function load() {
       const now        = new Date();
@@ -171,14 +229,22 @@
 
       // Populate selects
       const prodOpts = (prodRes.data || []).map(p => `<option value="${p.id}" data-price="${p.price}">${p.name}</option>`).join('');
-      document.getElementById('f-product').innerHTML = prodOpts;
+      document.getElementById('f-product').innerHTML = '<option value="">Ürün seçin</option>' + prodOpts;
       document.getElementById('f-customer').innerHTML = (custRes.data || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 
-      // Auto-fill price on product change
-      document.getElementById('f-product').addEventListener('change', e => {
+      // Auto-fill price and load color/size LOV on product change
+      document.getElementById('f-product').addEventListener('change', async e => {
         const opt = e.target.selectedOptions[0];
         document.getElementById('f-price').value = opt?.dataset.price || '';
+        await loadStockForProduct(e.target.value);
       });
+
+      document.getElementById('f-color').addEventListener('change', e => {
+        updateSizesForColor(e.target.value);
+        document.getElementById('stock-info').textContent = '';
+      });
+
+      document.getElementById('f-size').addEventListener('change', updateStockInfo);
 
       render(all);
     }
@@ -223,6 +289,10 @@
     document.getElementById('add-btn').addEventListener('click', () => {
       document.getElementById('item-form').reset();
       document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+      document.getElementById('f-color').innerHTML = '<option value="">Önce ürün seçin</option>';
+      document.getElementById('f-size').innerHTML  = '<option value="">—</option>';
+      document.getElementById('stock-info').textContent = '';
+      currentStock = [];
       openModal('item-modal');
     });
 
@@ -230,15 +300,26 @@
       e.preventDefault();
       const productSel  = document.getElementById('f-product');
       const customerSel = document.getElementById('f-customer');
+      const colorSel    = document.getElementById('f-color');
+      const sizeSel      = document.getElementById('f-size');
       const qty      = parseInt(document.getElementById('f-qty').value);
       const price    = parseFloat(document.getElementById('f-price').value);
       const discount = parseFloat(document.getElementById('f-discount').value) || 0;
 
+      if (!colorSel.value || !sizeSel.value) {
+        showToast('Lütfen renk ve beden seçin'); return;
+      }
+
+      const stockRow = currentStock.find(s => s.color === colorSel.value && s.size === sizeSel.value);
+      if (!stockRow || qty > stockRow.quantity) {
+        showToast(`Yetersiz stok! Mevcut: ${stockRow?.quantity ?? 0} adet`); return;
+      }
+
       const payload = {
         product_id:    productSel.value,
         product_name:  productSel.selectedOptions[0].text,
-        color:         document.getElementById('f-color').value.trim(),
-        size:          document.getElementById('f-size').value.trim() || null,
+        color:         colorSel.value,
+        size:          sizeSel.value,
         quantity:      qty,
         unit_price:    price,
         discount,
@@ -251,7 +332,17 @@
 
       const { error } = await supabase.from('sales').insert(payload);
       if (error) { showToast('Hata: ' + error.message); return; }
-      showToast('Satış kaydedildi');
+
+      // Decrement stock for the sold color/size
+      const { error: stockErr } = await supabase
+        .from('stock')
+        .update({ quantity: stockRow.quantity - qty })
+        .eq('product_id', productSel.value)
+        .eq('color', colorSel.value)
+        .eq('size', sizeSel.value);
+      if (stockErr) showToast('Satış kaydedildi ama stok güncellenemedi: ' + stockErr.message);
+      else showToast('Satış kaydedildi ve stok güncellendi');
+
       closeModal('item-modal');
       load();
     });

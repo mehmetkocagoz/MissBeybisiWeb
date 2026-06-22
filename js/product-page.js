@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>
 
+      <p class="stock-status" id="stock-status"></p>
+
       <div class="product-detail__cta">
         <button class="btn btn--primary btn--full btn--lg" id="add-to-cart">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -132,6 +134,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.classList.add('active');
   });
 
+  // Stock status for the currently selected color/size combination
+  const stockStatusEl = document.getElementById('stock-status');
+  const addToCartBtn = document.getElementById('add-to-cart');
+
+  async function refreshStockStatus() {
+    if (product.stock === 0) {
+      stockStatusEl.textContent = 'Stokta Yok';
+      stockStatusEl.classList.add('stock-status--oos');
+      addToCartBtn.disabled = true;
+      return;
+    }
+    const { fetchStockByColorSize } = await import('./supabase.js');
+    const qty = await fetchStockByColorSize(product.id, selectedColor, selectedSize);
+    if (qty === 0) {
+      stockStatusEl.textContent = 'Bu renk/beden için stokta yok';
+      stockStatusEl.classList.add('stock-status--oos');
+      addToCartBtn.disabled = true;
+    } else {
+      stockStatusEl.textContent = `Stokta ${qty} adet`;
+      stockStatusEl.classList.remove('stock-status--oos');
+      addToCartBtn.disabled = false;
+    }
+  }
+
   // Color selection
   let selectedColor = product.colors[0];
   document.querySelectorAll('.color-btn').forEach(btn => {
@@ -140,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.classList.add('active');
       selectedColor = btn.dataset.color;
       document.getElementById('selected-color').textContent = selectedColor;
+      refreshStockStatus();
     });
   });
 
@@ -151,8 +178,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.classList.add('active');
       selectedSize = btn.dataset.size;
       document.getElementById('selected-size').textContent = selectedSize;
+      refreshStockStatus();
     });
   });
+
+  refreshStockStatus();
 
   // Quantity control
   const qtyInput = document.getElementById('qty-input');
@@ -186,8 +216,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="product-grid product-grid--4">
           ${related.map(p => {
             const d = discountPct(p.price, p.originalPrice);
+            const oos = p.stock === 0;
             return `
-              <article class="product-card">
+              <article class="product-card${oos ? ' product-card--oos' : ''}">
                 <a href="product.html?slug=${p.slug}" class="product-card__img-wrap">
                   <img src="${imgSrc(p.images[0])}" alt="${p.name}"
                     class="product-card__img product-card__img--main" loading="lazy">
@@ -195,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     class="product-card__img product-card__img--hover" loading="lazy">` : ''}
                   ${d > 0 ? `<span class="badge badge--sale">-%${d}</span>` : ''}
                   ${p.isNew ? `<span class="badge badge--new">Yeni</span>` : ''}
+                  ${oos ? `<span class="badge badge--oos">Stokta Yok</span>` : ''}
                 </a>
                 <div class="product-card__body">
                   <h3 class="product-card__name"><a href="product.html?slug=${p.slug}">${p.name}</a></h3>

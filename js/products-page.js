@@ -27,8 +27,9 @@ function renderGrid(products) {
 
   grid.innerHTML = products.map(product => {
     const discount = discountPct(product.price, product.originalPrice);
+    const outOfStock = product.stock === 0;
     return `
-      <article class="product-card">
+      <article class="product-card${outOfStock ? ' product-card--oos' : ''}">
         <a href="product.html?slug=${product.slug}" class="product-card__img-wrap">
           <img src="${imgSrc(product.images[0])}" alt="${product.name}"
             class="product-card__img product-card__img--main" loading="lazy">
@@ -36,11 +37,14 @@ function renderGrid(products) {
             class="product-card__img product-card__img--hover" loading="lazy">` : ''}
           ${discount > 0 ? `<span class="badge badge--sale">-%${discount}</span>` : ''}
           ${product.isNew ? `<span class="badge badge--new">Yeni</span>` : ''}
+          ${outOfStock ? `<span class="badge badge--oos">Stokta Yok</span>` : ''}
           <div class="product-card__actions">
-            <button class="product-card__quick-add btn btn--primary btn--sm"
-              data-id="${product.id}" data-color="${product.colors[0]}" data-size="${product.sizes[0]}">
-              Sepete Ekle
-            </button>
+            ${outOfStock
+              ? `<button class="btn btn--primary btn--sm" disabled>Stokta Yok</button>`
+              : `<button class="product-card__quick-add btn btn--primary btn--sm"
+                  data-id="${product.id}" data-color="${product.colors[0]}" data-size="${product.sizes[0]}">
+                  Sepete Ekle
+                </button>`}
           </div>
         </a>
         <div class="product-card__body">

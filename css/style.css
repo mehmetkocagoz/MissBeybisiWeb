@@ -161,7 +161,15 @@ h3 { font-size: 1.15rem; font-weight: 500; }
 }
 .badge--sale { background: var(--primary); color: #fff; }
 .badge--new { background: var(--secondary); color: #fff; }
+.badge--oos { background: #6b6b6b; color: #fff; }
 .badge--lg { font-size: 13px; padding: 5px 14px; }
+
+/* ── Out of stock state ── */
+.product-card--oos .product-card__img { opacity: 0.55; }
+.product-card--oos .product-card__name a { color: #888; }
+
+.stock-status { font-size: 13px; font-weight: 600; color: var(--success, #1d9e75); margin: 4px 0 12px; }
+.stock-status--oos { color: #c0392b; }
 
 /* ── Header ── */
 .site-header {

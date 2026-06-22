@@ -256,3 +256,16 @@ select
 from products p
 join stock s on s.product_id = p.id
 where p.active = true;
+
+-- One row per product with total stock across all color/size variants.
+-- Used by the storefront to show "Stokta Yok" when a product has zero stock.
+create or replace view product_stock_totals as
+select
+  p.id as product_id,
+  coalesce(sum(s.quantity), 0) as total_quantity
+from products p
+left join stock s on s.product_id = p.id
+group by p.id;
+
+grant select on stock_summary to anon, authenticated;
+grant select on product_stock_totals to anon, authenticated;

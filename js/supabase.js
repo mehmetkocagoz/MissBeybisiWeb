@@ -94,6 +94,14 @@ export async function fetchStock(productId) {
   return data;
 }
 
+export async function fetchStockTotals() {
+  const { data, error } = await supabase
+    .from('product_stock_totals')
+    .select('*');
+  if (error) throw error;
+  return data;
+}
+
 export async function fetchStockByColorSize(productId, color, size) {
   const { data, error } = await supabase
     .from('stock')

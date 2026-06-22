@@ -10,7 +10,7 @@ window.productsReady = new Promise(resolve => { _resolveReady = resolve; });
 const CATEGORY_LABELS = { 'ozel-gun': 'Özel Gün', 'gunluk': 'Günlük' };
 const AGE_LABELS = { '0-2-yas': '0–2 Yaş', '2-4-yas': '2–4 Yaş', '4-8-yas': '4–8 Yaş' };
 
-function mapProduct(row) {
+function mapProduct(row, stockByProductId) {
   return {
     id: row.id,
     name: row.name,
@@ -27,14 +27,16 @@ function mapProduct(row) {
     isNew: !!row.is_new,
     images: row.images || [],
     description: row.description || '',
+    stock: stockByProductId.get(row.id) ?? 0,
   };
 }
 
 async function loadProducts() {
   try {
-    const { fetchProducts } = await import('./supabase.js');
-    const rows = await fetchProducts();
-    PRODUCTS = rows.map(mapProduct);
+    const { fetchProducts, fetchStockTotals } = await import('./supabase.js');
+    const [rows, stockTotals] = await Promise.all([fetchProducts(), fetchStockTotals()]);
+    const stockByProductId = new Map(stockTotals.map(s => [s.product_id, Number(s.total_quantity)]));
+    PRODUCTS = rows.map(row => mapProduct(row, stockByProductId));
   } catch (err) {
     console.error('Ürünler yüklenemedi:', err);
     PRODUCTS = [];

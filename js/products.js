@@ -34,8 +34,16 @@ function mapProduct(row, stockByProductId) {
 async function loadProducts() {
   try {
     const { fetchProducts, fetchStockTotals } = await import('./supabase.js');
-    const [rows, stockTotals] = await Promise.all([fetchProducts(), fetchStockTotals()]);
-    const stockByProductId = new Map(stockTotals.map(s => [s.product_id, Number(s.total_quantity)]));
+    const rows = await fetchProducts();
+
+    let stockByProductId = new Map();
+    try {
+      const stockTotals = await fetchStockTotals();
+      stockByProductId = new Map(stockTotals.map(s => [s.product_id, Number(s.total_quantity)]));
+    } catch (stockErr) {
+      console.error('Stok toplamları yüklenemedi (product_stock_totals view eksik olabilir):', stockErr);
+    }
+
     PRODUCTS = rows.map(row => mapProduct(row, stockByProductId));
   } catch (err) {
     console.error('Ürünler yüklenemedi:', err);

@@ -110,7 +110,7 @@
 
     async function load() {
       const [stockRes, prodRes] = await Promise.all([
-        supabase.from('stock').select('*, products(name)').order('created_at', { ascending: false }),
+        supabase.from('stock').select('*, products(name)').order('color'),
         supabase.from('products').select('id,name').eq('active', true).order('name'),
       ]);
       allStock = stockRes.data || [];

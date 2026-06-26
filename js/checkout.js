@@ -172,10 +172,13 @@ async function loadIyzicoForm() {
     );
 
     // 2. Call the Supabase Edge Function to get an İyzico Checkout Form token
-    const { IYZICO_INIT_URL } = await import('./config.js');
+    const { IYZICO_INIT_URL, SUPABASE_ANON_KEY } = await import('./config.js');
     const res = await fetch(IYZICO_INIT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify({ orderId: createdOrder.id, ...order }),
     });
 

@@ -140,6 +140,7 @@
       <div id="detail-body"></div>
       <div class="modal__footer">
         <button class="btn btn--danger" id="cancel-invoice-btn">Faturayı İptal Et</button>
+        <button class="btn btn--primary" id="download-pdf-btn">PDF İndir</button>
         <button class="btn btn--ghost modal__close">Kapat</button>
       </div>
     </div>
@@ -207,15 +208,16 @@
     });
 
     // Line items
-    function addLine(name = '', color = '', qty = 1, price = 0) {
+    function addLine(name = '', color = '', size = '', qty = 1, price = 0) {
       lineCount++;
       const id  = lineCount;
       const div = document.createElement('div');
       div.id = `line-${id}`;
-      div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
+      div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
       div.innerHTML = `
         <input type="text"   class="line-name"  placeholder="Ürün adı" value="${name}"  style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
         <input type="text"   class="line-color" placeholder="Renk"     value="${color}" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
+        <input type="text"   class="line-size"  placeholder="Beden"    value="${size}"  style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
         <input type="number" class="line-qty"   placeholder="Adet"     value="${qty}"   min="1" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
         <input type="number" class="line-price" placeholder="Fiyat ₺"  value="${price}" min="0" step="0.01" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px">
         <button type="button" onclick="document.getElementById('line-${id}').remove();updateTotal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--danger)">×</button>
@@ -239,15 +241,39 @@
 
     document.getElementById('add-line-btn').addEventListener('click', () => addLine());
 
-    document.getElementById('add-btn').addEventListener('click', () => {
+    let draftSaleIds = null;
+
+    function openBlankInvoiceModal() {
       document.getElementById('invoice-form').reset();
       document.getElementById('line-items').innerHTML = '';
       document.getElementById('grand-total-display').textContent = '₺0,00';
       document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+      document.getElementById('f-customer').disabled = false;
       lineCount = 0;
+      draftSaleIds = null;
       addLine();
       openModal('invoice-modal');
-    });
+    }
+
+    document.getElementById('add-btn').addEventListener('click', openBlankInvoiceModal);
+
+    function openInvoiceModalFromSalesDraft(draft) {
+      document.getElementById('invoice-form').reset();
+      document.getElementById('line-items').innerHTML = '';
+      document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+      lineCount = 0;
+      draftSaleIds = draft.saleIds;
+
+      const custSel = document.getElementById('f-customer');
+      custSel.value = draft.customerId;
+      custSel.disabled = true; // lock customer — must match the selected sales
+      const opt = custSel.selectedOptions[0];
+      document.getElementById('f-address').value = opt?.dataset.address || '';
+
+      draft.items.forEach(it => addLine(it.product_name, it.color || '', it.size || '', it.quantity, it.unit_price));
+      openModal('invoice-modal');
+      showToast(`${draft.items.length} satış kalemiyle fatura hazırlanıyor`);
+    }
 
     document.getElementById('invoice-form').addEventListener('submit', async e => {
       e.preventDefault();
@@ -258,11 +284,12 @@
       document.querySelectorAll('#line-items > div').forEach(row => {
         const name  = row.querySelector('.line-name')?.value.trim();
         const color = row.querySelector('.line-color')?.value.trim();
+        const size  = row.querySelector('.line-size')?.value.trim();
         const qty   = parseInt(row.querySelector('.line-qty')?.value)    || 0;
         const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
         if (name && qty > 0) {
           const lineTotal = qty * price;
-          items.push({ product_name: name, color: color || null, quantity: qty, unit_price: price, total: lineTotal });
+          items.push({ product_name: name, color: color || null, size: size || null, quantity: qty, unit_price: price, total: lineTotal });
           total += lineTotal;
         }
       });
@@ -289,6 +316,13 @@
       const { error: itemErr } = await supabase.from('invoice_items').insert(rows);
       if (itemErr) { showToast('Kalem hatası: ' + itemErr.message); return; }
 
+      if (draftSaleIds?.length) {
+        const { error: linkErr } = await supabase.from('sales').update({ invoice_id: inv.id }).in('id', draftSaleIds);
+        if (linkErr) showToast('Fatura oluşturuldu ama satışlar işaretlenemedi: ' + linkErr.message);
+        draftSaleIds = null;
+      }
+
+      document.getElementById('f-customer').disabled = false;
       showToast('Fatura oluşturuldu');
       closeModal('invoice-modal');
       load();
@@ -342,6 +376,67 @@
 
     document.getElementById('cancel-invoice-btn').addEventListener('click', () => cancelInvoice(currentInvoiceId, true));
 
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = src; s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function downloadInvoicePdf(inv) {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.js');
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text('MissBeybisi', 14, 18);
+      doc.setFontSize(10);
+      doc.text('Hüseyin Oğulcan Kocagöz (Şahıs İşletmesi)', 14, 25);
+      doc.text('Akdeniz Mah. Mimar Kemalettin Cad. T. Ülkü Çarşısı No:107 İç Kapı No:308 Konak/İzmir', 14, 30);
+      doc.text('Vergi Dairesi: Konak — Vergi No: 63292129576', 14, 35);
+
+      doc.setFontSize(14);
+      doc.text(`Fatura No: ${inv.invoice_no}`, 14, 48);
+      doc.setFontSize(10);
+      doc.text(`Tarih: ${fmtDate(inv.issue_date)}`, 14, 54);
+      doc.text(`Müşteri: ${inv.customer_name}`, 14, 60);
+      if (inv.customer_address) doc.text(`Adres: ${inv.customer_address}`, 14, 65);
+      if (inv.tc_vd) doc.text(`TC/VD: ${inv.tc_vd}`, 14, 70);
+
+      const rows = (inv.invoice_items || []).map(it => [
+        it.product_name, it.color || '—', it.size || '—', it.quantity,
+        fmtMoney(it.unit_price), fmtMoney(it.total),
+      ]);
+
+      doc.autoTable({
+        startY: 78,
+        head: [['Ürün', 'Renk', 'Beden', 'Adet', 'Birim Fiyat', 'Toplam']],
+        body: rows,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [192, 57, 138] },
+      });
+
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(12);
+      doc.text(`Genel Toplam: ${fmtMoney(inv.grand_total)}`, 14, finalY);
+
+      if (inv.cancelled) {
+        doc.setTextColor(200, 0, 0);
+        doc.text('Bu fatura iptal edilmiştir.', 14, finalY + 8);
+      }
+
+      doc.save(`${inv.invoice_no}.pdf`);
+    }
+
+    document.getElementById('download-pdf-btn').addEventListener('click', () => {
+      const inv = all.find(x => x.id === currentInvoiceId);
+      if (inv) downloadInvoicePdf(inv);
+    });
+
     async function cancelInvoice(id, fromModal = false) {
       if (!confirm('Bu faturayı iptal etmek istediğinize emin misiniz?')) return;
       const { error } = await supabase.from('invoices').update({ cancelled: true }).eq('id', id);
@@ -351,7 +446,17 @@
       load();
     }
 
-    load();
+    load().then(() => {
+      const draftRaw = sessionStorage.getItem('mb_invoice_draft');
+      if (draftRaw) {
+        sessionStorage.removeItem('mb_invoice_draft');
+        try {
+          openInvoiceModalFromSalesDraft(JSON.parse(draftRaw));
+        } catch (err) {
+          console.error('Fatura taslağı okunamadı:', err);
+        }
+      }
+    });
   </script>
 </body>
 </html>

@@ -34,6 +34,7 @@
     <div class="admin-topbar">
       <h1>Satışlar</h1>
       <div class="topbar-actions">
+        <button class="btn btn--ghost" id="invoice-from-sales-btn" disabled>Seçilenlerden Fatura Oluştur</button>
         <button class="btn btn--primary" id="add-btn">+ Manuel Satış</button>
       </div>
     </div>
@@ -69,6 +70,7 @@
           <table>
             <thead>
               <tr>
+                <th></th>
                 <th>Tarih</th>
                 <th>Ürün</th>
                 <th>Renk</th>
@@ -79,10 +81,11 @@
                 <th>Toplam</th>
                 <th>Müşteri</th>
                 <th>Satıcı</th>
+                <th>Fatura</th>
               </tr>
             </thead>
             <tbody id="table-body">
-              <tr><td colspan="10"><div class="spinner"></div></td></tr>
+              <tr><td colspan="12"><div class="spinner"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -249,14 +252,18 @@
       render(all);
     }
 
+    let selectedSaleIds = new Set();
+
     function render(rows) {
       const tbody = document.getElementById('table-body');
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-state__icon">💰</div><div class="empty-state__text">Satış kaydı bulunamadı</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state"><div class="empty-state__icon">💰</div><div class="empty-state__text">Satış kaydı bulunamadı</div></div></td></tr>';
+        updateInvoiceBtnState();
         return;
       }
       tbody.innerHTML = rows.map(s => `
         <tr>
+          <td>${s.invoice_id ? '' : `<input type="checkbox" class="sale-checkbox" data-id="${s.id}" ${selectedSaleIds.has(s.id) ? 'checked' : ''}>`}</td>
           <td style="font-size:13px">${s.sell_date}</td>
           <td style="font-weight:600">${s.product_name}</td>
           <td>${s.color}</td>
@@ -267,9 +274,47 @@
           <td style="font-weight:700">${fmtMoney(s.total)}</td>
           <td>${s.customer_name}</td>
           <td style="font-size:13px;color:var(--text-muted)">${s.seller || '—'}</td>
+          <td>${s.invoice_id ? '<span class="badge badge--green">Faturalandı</span>' : '<span class="badge badge--gray">—</span>'}</td>
         </tr>
       `).join('');
+
+      tbody.querySelectorAll('.sale-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedSaleIds.add(cb.dataset.id);
+          else selectedSaleIds.delete(cb.dataset.id);
+          updateInvoiceBtnState();
+        });
+      });
+      updateInvoiceBtnState();
     }
+
+    function updateInvoiceBtnState() {
+      const btn = document.getElementById('invoice-from-sales-btn');
+      const selected = all.filter(s => selectedSaleIds.has(s.id));
+      const uniqueCustomers = new Set(selected.map(s => s.customer_id));
+      btn.disabled = selected.length === 0 || uniqueCustomers.size > 1;
+      btn.title = uniqueCustomers.size > 1 ? 'Yalnızca aynı müşteriye ait satışları seçin' : '';
+    }
+
+    document.getElementById('invoice-from-sales-btn').addEventListener('click', () => {
+      const selected = all.filter(s => selectedSaleIds.has(s.id));
+      if (!selected.length) return;
+      const draft = {
+        customerId: selected[0].customer_id,
+        customerName: selected[0].customer_name,
+        saleIds: selected.map(s => s.id),
+        items: selected.map(s => ({
+          product_name: s.product_name,
+          color: s.color,
+          size: s.size,
+          quantity: s.quantity,
+          unit_price: s.unit_price,
+          total: s.total,
+        })),
+      };
+      sessionStorage.setItem('mb_invoice_draft', JSON.stringify(draft));
+      window.location.href = 'invoices.html';
+    });
 
     function filter() {
       const q    = document.getElementById('search').value.toLowerCase();

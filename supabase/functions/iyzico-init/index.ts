@@ -47,6 +47,17 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
 
   try {
+    const missingEnv = [];
+    if (!IYZICO_API_KEY)       missingEnv.push('IYZICO_API_KEY');
+    if (!IYZICO_SECRET_KEY)    missingEnv.push('IYZICO_SECRET_KEY');
+    if (!SUPABASE_URL)         missingEnv.push('SUPABASE_URL');
+    if (!SUPABASE_SERVICE_KEY) missingEnv.push('SUPABASE_SERVICE_ROLE_KEY');
+    if (missingEnv.length) {
+      return new Response(JSON.stringify({ error: `Sunucuda eksik secret: ${missingEnv.join(', ')}` }), {
+        status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
     const { orderId, customer, items, total } = body;
 
@@ -141,7 +152,12 @@ Deno.serve(async (req) => {
     const iyzicoData = await iyzicoRes.json();
 
     if (iyzicoData.status !== 'success') {
-      return new Response(JSON.stringify({ error: iyzicoData.errorMessage || 'İyzico hatası' }), {
+      console.error('İyzico initialize failed:', JSON.stringify(iyzicoData));
+      return new Response(JSON.stringify({
+        error: iyzicoData.errorMessage || 'İyzico hatası',
+        errorCode: iyzicoData.errorCode,
+        usedBaseUrl: IYZICO_BASE_URL,
+      }), {
         status: 502, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
     }

@@ -190,7 +190,9 @@ async function loadIyzicoForm() {
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.error || `İyzico token alınamadı (HTTP ${res.status})`);
+      const detail = [errBody.error, errBody.errorCode && `kod: ${errBody.errorCode}`, errBody.usedBaseUrl && `endpoint: ${errBody.usedBaseUrl}`]
+        .filter(Boolean).join(' | ');
+      throw new Error(detail || `İyzico token alınamadı (HTTP ${res.status})`);
     }
     const { token } = await res.json();
 

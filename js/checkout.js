@@ -44,12 +44,18 @@ function fmt(n) {
 
 // ── Order summary rendering ───────────────────────────────────────────────────
 
+function itemImgSrc(image) {
+  if (!image) return '';
+  if (/^https?:\/\//i.test(image)) return image;
+  return 'photos/' + image.replace(/ /g, '%20');
+}
+
 function renderSummary() {
   const container = document.getElementById('summary-items');
   container.innerHTML = cart.map(it => `
     <div class="summary-item">
       <div class="summary-item__img">
-        <img src="photos/${encodeURIComponent(it.image || '')}" alt="${it.name}" onerror="this.style.display='none'">
+        <img src="${itemImgSrc(it.image)}" alt="${it.name}" onerror="this.style.display='none'">
       </div>
       <div class="summary-item__info">
         <p class="summary-item__name">${it.name}</p>
@@ -182,7 +188,10 @@ async function loadIyzicoForm() {
       body: JSON.stringify({ orderId: createdOrder.id, ...order }),
     });
 
-    if (!res.ok) throw new Error('İyzico token alınamadı');
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || `İyzico token alınamadı (HTTP ${res.status})`);
+    }
     const { token } = await res.json();
 
     // 3. Load İyzico JS SDK and render the form

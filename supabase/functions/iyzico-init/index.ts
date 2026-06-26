@@ -18,7 +18,7 @@ const SITE_URL = Deno.env.get('SITE_URL') || 'https://missbeybisi.com';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': SITE_URL,
-  'Access-Control-Allow-Headers': 'content-type',
+  'Access-Control-Allow-Headers': 'content-type, authorization, x-client-info, apikey',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 

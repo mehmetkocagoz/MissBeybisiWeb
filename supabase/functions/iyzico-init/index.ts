@@ -97,11 +97,14 @@ Deno.serve(async (req) => {
     const surname = nameParts.length > 1 ? nameParts.pop() : 'Müşteri';
     const name = nameParts.join(' ') || customer.name;
 
+    const basketTotal = items.reduce((sum: number, it: any) => sum + Number(it.total), 0);
+    const shippingAmount = Number(total) - basketTotal;
+
     const iyzicoPayload = {
       locale: 'tr',
       conversationId: orderId,
-      price: total.toFixed(2),
-      paidPrice: total.toFixed(2),
+      price: basketTotal.toFixed(2),
+      paidPrice: Number(total).toFixed(2),
       currency: 'TRY',
       basketId: orderId,
       paymentGroup: 'PRODUCT',
@@ -131,13 +134,22 @@ Deno.serve(async (req) => {
         country: 'Turkey',
         address: customer.address,
       },
-      basketItems: items.map((it: any, i: number) => ({
-        id: `${it.product_id || 'item'}-${i}`,
-        name: it.product_name,
-        category1: 'Çocuk Giyim',
-        itemType: 'PHYSICAL',
-        price: Number(it.total).toFixed(2),
-      })),
+      basketItems: [
+        ...items.map((it: any, i: number) => ({
+          id: `${it.product_id || 'item'}-${i}`,
+          name: it.product_name,
+          category1: 'Çocuk Giyim',
+          itemType: 'PHYSICAL',
+          price: Number(it.total).toFixed(2),
+        })),
+        ...(shippingAmount > 0 ? [{
+          id: 'shipping',
+          name: 'Kargo',
+          category1: 'Kargo',
+          itemType: 'PHYSICAL',
+          price: shippingAmount.toFixed(2),
+        }] : []),
+      ],
     };
 
     const requestBody = JSON.stringify(iyzicoPayload);

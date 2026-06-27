@@ -197,7 +197,7 @@ async function loadIyzicoForm() {
     const { token } = await res.json();
 
     // 3. Load İyzico JS SDK and render the form
-    await loadScript('https://sandbox-static.iyzipay.com/checkoutform/v2/bundle.js');
+    await loadScript('https://static.iyzipay.com/checkoutform/v2/bundle.js');
     container.innerHTML = `<div id="iyzipay-checkout-form" class="responsive"></div>`;
     window.iyziInit?.({ token, locale: 'tr' });
 

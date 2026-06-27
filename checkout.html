@@ -109,11 +109,8 @@
               </label>
             </div>
 
-            <!-- İyzico card form injected here -->
-            <div id="iyzico-checkout-form" class="iyzico-form-container">
-              <!-- İyzico Checkout Form JS will render here -->
-              <p class="iyzico-loading">Ödeme formu yükleniyor...</p>
-            </div>
+            <!-- İyzico status message (loading / error) -->
+            <div id="iyzico-checkout-form" class="iyzico-form-container"></div>
 
             <div id="bank-transfer-info" class="bank-info hidden">
               <p>Aşağıdaki hesaba siparişinizin tutarını aktarın, açıklamaya sipariş numaranızı yazın:</p>
@@ -133,6 +130,7 @@
             </label>
 
             <button class="btn btn--primary btn--full" id="confirm-bank-btn" style="display:none">Siparişi Onayla</button>
+            <button class="btn btn--primary btn--full" id="iyzico-pay-btn">İyzico ile Öde</button>
 
             <div class="iyzico-badge" style="justify-content:center;margin-top:14px">
               <img src="images/iyzico/iyzico_ile_ode_colored.svg" alt="İyzico ile öde" style="height:32px">

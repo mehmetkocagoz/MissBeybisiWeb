@@ -105,17 +105,15 @@ function goToPayment() {
   document.getElementById('step-pay-label').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  document.getElementById('iyzico-checkout-form').innerHTML =
-    '<p class="iyzico-loading">Ödeme formunu görüntülemek için lütfen aşağıdaki sözleşmeyi onaylayın.</p>';
+  bindIyzicoPayButton();
+}
 
-  let iyzicoLoaded = false;
-  document.getElementById('legal-consent').addEventListener('change', e => {
-    const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    if (e.target.checked && method === 'iyzico' && !iyzicoLoaded) {
-      iyzicoLoaded = true;
-      loadIyzicoForm();
-    }
-  });
+function bindIyzicoPayButton() {
+  const btn = document.getElementById('iyzico-pay-btn');
+  btn.onclick = () => {
+    if (!hasLegalConsent()) return;
+    loadIyzicoForm();
+  };
 }
 
 function bindBackButton() {
@@ -133,6 +131,7 @@ function bindPaymentToggle() {
     radio.addEventListener('change', () => {
       const method = radio.value;
       document.getElementById('iyzico-checkout-form').classList.toggle('hidden', method !== 'iyzico');
+      document.getElementById('iyzico-pay-btn').style.display = method === 'iyzico' ? '' : 'none';
       document.getElementById('bank-transfer-info').classList.toggle('hidden', method !== 'bank_transfer');
       document.getElementById('confirm-bank-btn').style.display = method === 'bank_transfer' ? '' : 'none';
       if (method === 'bank_transfer') bindBankConfirm();
@@ -147,16 +146,15 @@ function hasLegalConsent() {
 }
 
 // ── İyzico Checkout Form ──────────────────────────────────────────────────────
-// İyzico's JS SDK injects a payment form iframe.
-// You need a backend endpoint (/api/iyzico-init) that:
-//   1. Receives order details
-//   2. Calls İyzico Initialize CheckoutForm API with your API key + secret
-//   3. Returns the token
+// Redirects to İyzico's hosted payment page (paymentPageUrl) instead of
+// embedding their JS widget — avoids sandbox/live bundle mismatches.
 // See: https://docs.iyzico.com/checkout-form/initialize
 
 async function loadIyzicoForm() {
   const container = document.getElementById('iyzico-checkout-form');
-  container.innerHTML = '<p class="iyzico-loading">Ödeme formu yükleniyor...</p>';
+  const btn = document.getElementById('iyzico-pay-btn');
+  container.innerHTML = '<p class="iyzico-loading">Ödeme sayfasına yönlendiriliyorsunuz...</p>';
+  btn.disabled = true;
 
   try {
     const order = buildOrderPayload('iyzico');
@@ -194,15 +192,16 @@ async function loadIyzicoForm() {
         .filter(Boolean).join(' | ');
       throw new Error(detail || `İyzico token alınamadı (HTTP ${res.status})`);
     }
-    const { token } = await res.json();
+    const { paymentPageUrl } = await res.json();
+    if (!paymentPageUrl) throw new Error('İyzico ödeme sayfası adresi alınamadı');
 
-    // 3. Load İyzico JS SDK and render the form
-    await loadScript('https://static.iyzipay.com/checkoutform/v2/bundle.js');
-    container.innerHTML = `<div id="iyzipay-checkout-form" class="responsive"></div>`;
-    window.iyziInit?.({ token, locale: 'tr' });
+    // 3. Redirect to İyzico's hosted payment page
+    localStorage.removeItem('missbeybisi_cart');
+    window.location.href = paymentPageUrl;
 
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">Ödeme formu yüklenemedi: ${err.message}</p>`;
+    container.innerHTML = `<p class="error-msg">Ödeme sayfasına yönlendirilemedi: ${err.message}</p>`;
+    btn.disabled = false;
     console.error(err);
   }
 }
@@ -278,13 +277,4 @@ function buildOrderPayload(method) {
     total:    cartSubtotal() + shippingCost(),
     method,
   };
-}
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
-  });
 }

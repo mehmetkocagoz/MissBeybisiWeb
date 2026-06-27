@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
 
     await supabase.from('orders').update({ iyzico_token: iyzicoData.token }).eq('id', orderId);
 
-    return new Response(JSON.stringify({ token: iyzicoData.token, checkoutFormContent: iyzicoData.checkoutFormContent }), {
+    return new Response(JSON.stringify({ token: iyzicoData.token, paymentPageUrl: iyzicoData.paymentPageUrl }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
 

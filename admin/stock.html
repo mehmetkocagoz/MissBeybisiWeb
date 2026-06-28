@@ -109,17 +109,21 @@
     let allStock = [];
     let products = [];
 
+    function productLabel(p) {
+      return p?.stock_code ? `${p.stock_code}-${p.name}` : (p?.name || '—');
+    }
+
     async function load() {
       const [stockRes, prodRes] = await Promise.all([
-        supabase.from('stock').select('*, products(name)').order('color'),
-        supabase.from('products').select('id,name,colors,sizes').eq('active', true).order('name'),
+        supabase.from('stock').select('*, products(name, stock_code)').order('color'),
+        supabase.from('products').select('id,name,stock_code,colors,sizes').eq('active', true).order('name'),
       ]);
       allStock = stockRes.data || [];
       products = prodRes.data || [];
 
       const sel = document.getElementById('filter-product');
       const sSel = document.getElementById('s-product');
-      const opts = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      const opts = products.map(p => `<option value="${p.id}">${productLabel(p)}</option>`).join('');
       sel.innerHTML  = '<option value="">Tüm Ürünler</option>' + opts;
       sSel.innerHTML = opts;
 
@@ -144,7 +148,7 @@
       }
       tbody.innerHTML = rows.map(s => `
         <tr>
-          <td style="font-weight:600">${s.products?.name || '—'}</td>
+          <td style="font-weight:600">${productLabel(s.products)}</td>
           <td>${s.color}</td>
           <td>${s.size}</td>
           <td>
@@ -162,7 +166,7 @@
       const q    = document.getElementById('search').value.toLowerCase();
       const prod = document.getElementById('filter-product').value;
       return allStock.filter(s =>
-        (!q    || (s.products?.name || '').toLowerCase().includes(q) || s.color.toLowerCase().includes(q)) &&
+        (!q    || productLabel(s.products).toLowerCase().includes(q) || s.color.toLowerCase().includes(q)) &&
         (!prod || s.product_id === prod)
       );
     }

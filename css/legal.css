@@ -18,6 +18,7 @@
 .legal-content table td, .legal-content table th { border: 1px solid #e5e5e5; padding: 8px 12px; text-align: left; }
 .legal-content .fill-in { background: #fff3cd; padding: 1px 6px; border-radius: 4px; color: #92400e; font-weight: 600; }
 .legal-content a { color: var(--accent, #e07); }
+.map-embed { border-radius: var(--radius-md, 12px); overflow: hidden; margin-top: 12px; }
 
 /* Cookie consent banner */
 #cookie-banner {

@@ -11,6 +11,7 @@ function renderSiteHeader() {
           <nav class="site-nav" aria-label="Ana menü">
             <a href="index.html">Ana Sayfa</a>
             <a href="products.html">Koleksiyon</a>
+            <a href="hakkimizda.html">Hakkımızda</a>
           </nav>
           <div class="header-actions">
             <button class="header-btn" id="cart-btn" aria-label="Sepet">

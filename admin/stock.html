@@ -82,11 +82,11 @@
           </div>
           <div class="form-group">
             <label>Renk</label>
-            <input type="text" id="s-color" required placeholder="Pembe">
+            <select id="s-color" required></select>
           </div>
           <div class="form-group">
             <label>Beden</label>
-            <input type="text" id="s-size" required placeholder="3 Yaş">
+            <select id="s-size" required></select>
           </div>
           <div class="form-group form-group--full">
             <label>Adet</label>
@@ -112,7 +112,7 @@
     async function load() {
       const [stockRes, prodRes] = await Promise.all([
         supabase.from('stock').select('*, products(name)').order('color'),
-        supabase.from('products').select('id,name').eq('active', true).order('name'),
+        supabase.from('products').select('id,name,colors,sizes').eq('active', true).order('name'),
       ]);
       allStock = stockRes.data || [];
       products = prodRes.data || [];
@@ -124,6 +124,16 @@
       sSel.innerHTML = opts;
 
       render(allStock);
+    }
+
+    function populateColorSizeOptions(productId, selectedColor, selectedSize) {
+      const product = products.find(p => p.id === productId);
+      const colors = product?.colors || [];
+      const sizes = product?.sizes || [];
+      document.getElementById('s-color').innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('s-size').innerHTML = sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+      if (selectedColor) document.getElementById('s-color').value = selectedColor;
+      if (selectedSize) document.getElementById('s-size').value = selectedSize;
     }
 
     function render(rows) {
@@ -160,10 +170,15 @@
     document.getElementById('search').addEventListener('input', () => render(filter()));
     document.getElementById('filter-product').addEventListener('change', () => render(filter()));
 
+    document.getElementById('s-product').addEventListener('change', e => {
+      populateColorSizeOptions(e.target.value);
+    });
+
     document.getElementById('add-stock-btn').addEventListener('click', () => {
       document.getElementById('stock-modal-title').textContent = 'Stok Ekle / Güncelle';
       document.getElementById('stock-form').reset();
       document.getElementById('s-id').value = '';
+      populateColorSizeOptions(document.getElementById('s-product').value);
       openModal('stock-modal');
     });
 
@@ -173,8 +188,7 @@
       document.getElementById('stock-modal-title').textContent = 'Stok Düzenle';
       document.getElementById('s-id').value       = s.id;
       document.getElementById('s-product').value  = s.product_id;
-      document.getElementById('s-color').value    = s.color;
-      document.getElementById('s-size').value     = s.size;
+      populateColorSizeOptions(s.product_id, s.color, s.size);
       document.getElementById('s-quantity').value = s.quantity;
       openModal('stock-modal');
     }

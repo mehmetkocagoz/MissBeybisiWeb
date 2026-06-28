@@ -995,6 +995,7 @@ h3 { font-size: 1.15rem; font-weight: 500; }
   font-weight: 700;
   line-height: 1.2;
 }
+.product-detail__stock-code { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 .product-detail__price { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .option-label { font-size: 13px; font-weight: 500; color: var(--text-light); margin-bottom: 10px; }
 .option-label strong { color: var(--text); }

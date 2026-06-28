@@ -20,6 +20,7 @@ function mapProduct(row, stockByProductId) {
     id: row.id,
     name: row.name,
     slug: row.slug,
+    stockCode: row.stock_code || '',
     price: Number(row.price),
     originalPrice: row.original_price != null ? Number(row.original_price) : null,
     category: row.category,

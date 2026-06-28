@@ -58,6 +58,7 @@
             <thead>
               <tr>
                 <th>Ürün</th>
+                <th>Stok Kodu</th>
                 <th>Kategori</th>
                 <th>Yaş</th>
                 <th>Fiyat</th>
@@ -68,7 +69,7 @@
               </tr>
             </thead>
             <tbody id="products-body">
-              <tr><td colspan="8"><div class="spinner"></div></td></tr>
+              <tr><td colspan="9"><div class="spinner"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -93,6 +94,10 @@
           <div class="form-group form-group--full">
             <label>Slug</label>
             <input type="text" id="p-slug" required placeholder="ornek-urun-adi">
+          </div>
+          <div class="form-group form-group--full">
+            <label>Stok Kodu</label>
+            <input type="text" id="p-stock-code" placeholder="Örn. MB-2026-014">
           </div>
           <div class="form-group">
             <label>Fiyat (₺)</label>
@@ -213,13 +218,14 @@
     function render(products) {
       const tbody = document.getElementById('products-body');
       if (!products.length) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state__icon">👗</div><div class="empty-state__text">Ürün bulunamadı</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-state__icon">👗</div><div class="empty-state__text">Ürün bulunamadı</div></div></td></tr>';
         return;
       }
       const ageLabel = { '1-5-yas': '1–5 Yaş', '6-10-yas': '6–10 Yaş', '11-15-yas': '11–15 Yaş' };
       tbody.innerHTML = products.map(p => `
         <tr>
           <td style="font-weight:600">${p.name}</td>
+          <td style="font-size:13px;color:var(--text-muted)">${p.stock_code || '—'}</td>
           <td>${categoryLabel[p.category] || p.category}</td>
           <td>${ageLabel[p.age_group] || p.age_group}</td>
           <td>${fmtMoney(p.price)}</td>
@@ -279,6 +285,7 @@
       document.getElementById('p-id').value            = p.id;
       document.getElementById('p-name').value          = p.name;
       document.getElementById('p-slug').value          = p.slug;
+      document.getElementById('p-stock-code').value    = p.stock_code || '';
       document.getElementById('p-price').value         = p.price;
       document.getElementById('p-original-price').value = p.original_price || '';
       document.getElementById('p-category').value      = p.category;
@@ -299,6 +306,7 @@
       const payload = {
         name:           document.getElementById('p-name').value.trim(),
         slug:           document.getElementById('p-slug').value.trim(),
+        stock_code:     document.getElementById('p-stock-code').value.trim() || null,
         price:          parseFloat(document.getElementById('p-price').value),
         original_price: document.getElementById('p-original-price').value ? parseFloat(document.getElementById('p-original-price').value) : null,
         category:       document.getElementById('p-category').value,

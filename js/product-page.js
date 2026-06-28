@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       <p class="product-detail__age">${product.ageLabel}</p>
       <h1 class="product-detail__name">${product.name}</h1>
+      ${product.stockCode ? `<p class="product-detail__stock-code">Stok Kodu: ${product.stockCode}</p>` : ''}
 
       <div class="product-detail__price">
         <span class="price-current price-current--lg">${formatPrice(product.price)}</span>

@@ -9,6 +9,7 @@ create table if not exists products (
   id            uuid primary key default uuid_generate_v4(),
   name          text not null,
   slug          text unique not null,
+  stock_code    text,
   price         numeric(10,2) not null,
   original_price numeric(10,2),
   category      text not null check (category in ('ozel-gun','gunluk')),

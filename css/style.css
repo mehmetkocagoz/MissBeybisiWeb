@@ -837,6 +837,7 @@ h3 { font-size: 1.15rem; font-weight: 500; }
 .price-inputs { display: flex; gap: 8px; align-items: center; }
 .price-inputs input {
   flex: 1;
+  min-width: 0;
   padding: 8px 12px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);

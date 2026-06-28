@@ -104,6 +104,24 @@ function resetFilters() {
   applyFilters();
 }
 
+function renderCategoryChips() {
+  const wrap = document.getElementById('category-filter-chips');
+  if (!wrap) return;
+
+  wrap.innerHTML = `<button class="filter-chip" data-filter-category="all">Tümü</button>` +
+    getCategories().map(c => `<button class="filter-chip" data-filter-category="${c.slug}">${c.name}</button>`).join('');
+
+  wrap.querySelectorAll('[data-filter-category]').forEach(chip => {
+    if (chip.dataset.filterCategory === currentFilters.category) chip.classList.add('active');
+    chip.addEventListener('click', () => {
+      wrap.querySelectorAll('[data-filter-category]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilters.category = chip.dataset.filterCategory;
+      applyFilters();
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await window.productsReady;
 
@@ -113,19 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (params.get('age')) currentFilters.ageGroup = params.get('age');
   if (params.get('q')) currentFilters.search = params.get('q');
 
+  renderCategoryChips();
+
   // Initial render
   applyFilters();
-
-  // Category filter chips
-  document.querySelectorAll('[data-filter-category]').forEach(chip => {
-    if (chip.dataset.filterCategory === currentFilters.category) chip.classList.add('active');
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('[data-filter-category]').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      currentFilters.category = chip.dataset.filterCategory;
-      applyFilters();
-    });
-  });
 
   // Age group filter chips
   document.querySelectorAll('[data-filter-age]').forEach(chip => {

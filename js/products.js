@@ -3,12 +3,17 @@
 // other scripts must `await window.productsReady` before calling the getters below.
 
 let PRODUCTS = [];
+let CATEGORIES = [];
+let CATEGORY_LABELS = {};
 
 let _resolveReady;
 window.productsReady = new Promise(resolve => { _resolveReady = resolve; });
 
-const CATEGORY_LABELS = { 'ozel-gun': 'Özel Gün', 'gunluk': 'Günlük' };
-const AGE_LABELS = { '0-2-yas': '0–2 Yaş', '2-4-yas': '2–4 Yaş', '4-8-yas': '4–8 Yaş' };
+const AGE_LABELS = { '1-5-yas': '1–5 Yaş', '6-10-yas': '6–10 Yaş', '11-15-yas': '11–15 Yaş' };
+
+function getCategories() {
+  return CATEGORIES;
+}
 
 function mapProduct(row, stockByProductId) {
   return {
@@ -33,7 +38,17 @@ function mapProduct(row, stockByProductId) {
 
 async function loadProducts() {
   try {
-    const { fetchProducts, fetchStockTotals } = await import('./supabase.js');
+    const { fetchProducts, fetchStockTotals, fetchCategories } = await import('./supabase.js');
+
+    try {
+      CATEGORIES = await fetchCategories();
+      CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map(c => [c.slug, c.name]));
+    } catch (catErr) {
+      console.error('Kategoriler yüklenemedi:', catErr);
+      CATEGORIES = [];
+      CATEGORY_LABELS = {};
+    }
+
     const rows = await fetchProducts();
 
     let stockByProductId = new Map();
@@ -72,6 +87,10 @@ function getFeaturedProducts() {
 
 function getNewProducts() {
   return PRODUCTS.filter(p => p.isNew);
+}
+
+function getProductsByCategory(category) {
+  return PRODUCTS.filter(p => p.category === category);
 }
 
 function getRelatedProducts(product, count = 4) {

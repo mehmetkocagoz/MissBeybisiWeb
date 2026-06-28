@@ -11,6 +11,18 @@ const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5c
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ── Categories ────────────────────────────────────────────────────────────────
+
+export async function fetchCategories() {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order');
+  if (error) throw error;
+  return data;
+}
+
 // ── Products ──────────────────────────────────────────────────────────────────
 
 export async function fetchProducts(filters = {}) {

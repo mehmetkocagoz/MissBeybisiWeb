@@ -15,6 +15,7 @@
       <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
       <div class="nav-section-label">Katalog</div>
       <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
+      <a href="categories.html"><span class="nav-icon">🏷️</span> Kategoriler</a>
       <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
       <div class="nav-section-label">Muhasebe</div>
       <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
@@ -42,14 +43,12 @@
         <input class="search-input" id="search" type="search" placeholder="Ürün adı veya slug ara…">
         <select id="filter-category" class="search-input" style="min-width:150px">
           <option value="">Tüm Kategoriler</option>
-          <option value="ozel-gun">Özel Gün</option>
-          <option value="gunluk">Günlük</option>
         </select>
         <select id="filter-age" class="search-input" style="min-width:140px">
           <option value="">Tüm Yaşlar</option>
-          <option value="0-2-yas">0–2 Yaş</option>
-          <option value="2-4-yas">2–4 Yaş</option>
-          <option value="4-8-yas">4–8 Yaş</option>
+          <option value="1-5-yas">1–5 Yaş</option>
+          <option value="6-10-yas">6–10 Yaş</option>
+          <option value="11-15-yas">11–15 Yaş</option>
         </select>
       </div>
 
@@ -105,17 +104,14 @@
           </div>
           <div class="form-group">
             <label>Kategori</label>
-            <select id="p-category" required>
-              <option value="ozel-gun">Özel Gün</option>
-              <option value="gunluk">Günlük</option>
-            </select>
+            <select id="p-category" required></select>
           </div>
           <div class="form-group">
             <label>Yaş Grubu</label>
             <select id="p-age-group" required>
-              <option value="0-2-yas">0–2 Yaş</option>
-              <option value="2-4-yas">2–4 Yaş</option>
-              <option value="4-8-yas">4–8 Yaş</option>
+              <option value="1-5-yas">1–5 Yaş</option>
+              <option value="6-10-yas">6–10 Yaş</option>
+              <option value="11-15-yas">11–15 Yaş</option>
             </select>
           </div>
           <div class="form-group form-group--full">
@@ -160,7 +156,22 @@
     import { supabase, fmtMoney, showToast, openModal, closeModal } from './js/admin-common.js';
 
     let allProducts = [];
+    let allCategories = [];
+    let categoryLabel = {};
     let currentImages = [];
+
+    async function loadCategories() {
+      const { data, error } = await supabase.from('categories').select('*').order('sort_order');
+      if (error) { showToast('Kategoriler yüklenemedi: ' + error.message); return; }
+      allCategories = data || [];
+      categoryLabel = Object.fromEntries(allCategories.map(c => [c.slug, c.name]));
+
+      const filterSelect = document.getElementById('filter-category');
+      const formSelect = document.getElementById('p-category');
+      const options = allCategories.map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+      filterSelect.innerHTML = '<option value="">Tüm Kategoriler</option>' + options;
+      formSelect.innerHTML = options;
+    }
 
     function renderImagePreview() {
       const wrap = document.getElementById('p-images-preview');
@@ -205,12 +216,11 @@
         tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state__icon">👗</div><div class="empty-state__text">Ürün bulunamadı</div></div></td></tr>';
         return;
       }
-      const catLabel = { 'ozel-gun': 'Özel Gün', 'gunluk': 'Günlük' };
-      const ageLabel = { '0-2-yas': '0–2 Yaş', '2-4-yas': '2–4 Yaş', '4-8-yas': '4–8 Yaş' };
+      const ageLabel = { '1-5-yas': '1–5 Yaş', '6-10-yas': '6–10 Yaş', '11-15-yas': '11–15 Yaş' };
       tbody.innerHTML = products.map(p => `
         <tr>
           <td style="font-weight:600">${p.name}</td>
-          <td>${catLabel[p.category] || p.category}</td>
+          <td>${categoryLabel[p.category] || p.category}</td>
           <td>${ageLabel[p.age_group] || p.age_group}</td>
           <td>${fmtMoney(p.price)}</td>
           <td>${p.featured ? '✅' : '—'}</td>
@@ -318,7 +328,7 @@
       load();
     }
 
-    load();
+    loadCategories().then(load);
   </script>
 </body>
 </html>

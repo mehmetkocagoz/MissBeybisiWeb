@@ -12,7 +12,7 @@ create table if not exists products (
   price         numeric(10,2) not null,
   original_price numeric(10,2),
   category      text not null check (category in ('ozel-gun','gunluk')),
-  age_group     text not null check (age_group in ('0-2-yas','2-4-yas','4-8-yas')),
+  age_group     text not null check (age_group in ('1-5-yas','6-10-yas','11-15-yas')),
   colors        text[] not null default '{}',
   sizes         text[] not null default '{}',
   images        text[] not null default '{}',
@@ -74,7 +74,7 @@ create table if not exists orders (
   iyzico_payment_id text,
   notes           text,
   created_at      timestamptz not null default now(),
-  updated_at      timestamptz not null default now()
+  updated_at      timestamptz not null default now()https://www.youtube.com/watch?v=lP7rZLEc1ac&list=PLAha6dSMcQ13Cjq47Cwhh9_29eK3Y7PbT
 );
 
 -- ── Order Items ───────────────────────────────────────────────────────────────

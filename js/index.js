@@ -56,8 +56,31 @@ function bindQuickAdd(grid) {
   });
 }
 
+const CATEGORY_CARD_PHOTOS = [
+  'photos/WhatsApp%20Image%202026-06-14%20at%2022.31.56%20(8).jpeg',
+  'photos/WhatsApp%20Image%202026-06-14%20at%2022.31.56%20(4).jpeg',
+];
+
 document.addEventListener('DOMContentLoaded', async () => {
   await window.productsReady;
+
+  // Category cards (Özel Gün / Günlük / any admin-added category)
+  const categoryCardsWrap = document.getElementById('category-cards-dynamic');
+  if (categoryCardsWrap) {
+    categoryCardsWrap.innerHTML = getCategories().map((cat, i) => {
+      const count = getProductsByCategory(cat.slug).length;
+      const photo = CATEGORY_CARD_PHOTOS[i % CATEGORY_CARD_PHOTOS.length];
+      return `
+        <a href="products.html?category=${cat.slug}" class="category-card">
+          <img src="${photo}" alt="${cat.name} Elbiseleri" loading="lazy">
+          <div class="category-card__overlay"></div>
+          <div class="category-card__body">
+            <p class="category-card__name">${cat.name}</p>
+            <p class="category-card__count">${count} ürün</p>
+          </div>
+        </a>`;
+    }).join('');
+  }
 
   // Featured products
   const featuredGrid = document.getElementById('featured-grid');

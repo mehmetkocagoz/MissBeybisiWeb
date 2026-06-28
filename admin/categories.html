@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tedarikçiler — MissBeybisi Admin</title>
+  <title>Kategoriler — MissBeybisi Admin</title>
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
       <a href="orders.html"><span class="nav-icon">🛒</span> Siparişler</a>
       <div class="nav-section-label">Katalog</div>
       <a href="products.html"><span class="nav-icon">👗</span> Ürünler</a>
-      <a href="categories.html"><span class="nav-icon">🏷️</span> Kategoriler</a>
+      <a href="categories.html" class="active"><span class="nav-icon">🏷️</span> Kategoriler</a>
       <a href="stock.html"><span class="nav-icon">📦</span> Stok</a>
       <div class="nav-section-label">Muhasebe</div>
       <a href="sales.html"><span class="nav-icon">💰</span> Satışlar</a>
@@ -33,30 +33,26 @@
 
   <div class="admin-main">
     <div class="admin-topbar">
-      <h1>Tedarikçiler</h1>
+      <h1>Kategoriler</h1>
       <div class="topbar-actions">
-        <button class="btn btn--primary" id="add-btn">+ Yeni Tedarikçi</button>
+        <button class="btn btn--primary" id="add-btn">+ Yeni Kategori</button>
       </div>
     </div>
     <div class="admin-content">
-      <div class="toolbar">
-        <input class="search-input" id="search" type="search" placeholder="İsim veya telefon ara…">
-      </div>
       <div class="card">
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Firma Adı</th>
-                <th>İletişim Kişisi</th>
-                <th>Telefon</th>
-                <th>Adres</th>
-                <th>Kayıt Tarihi</th>
+                <th>Sıra</th>
+                <th>Ad</th>
+                <th>Slug</th>
+                <th>Durum</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="table-body">
-              <tr><td colspan="6"><div class="spinner"></div></td></tr>
+              <tr><td colspan="5"><div class="spinner"></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -68,27 +64,28 @@
   <div class="modal-backdrop hidden" id="item-modal">
     <div class="modal">
       <div class="modal__header">
-        <h2 class="modal__title" id="modal-title">Tedarikçi Ekle</h2>
+        <h2 class="modal__title" id="modal-title">Kategori Ekle</h2>
         <button class="modal__close">×</button>
       </div>
       <form id="item-form">
         <input type="hidden" id="f-id">
         <div class="form-grid">
           <div class="form-group form-group--full">
-            <label>Firma Adı</label>
-            <input type="text" id="f-name" required>
-          </div>
-          <div class="form-group">
-            <label>İletişim Kişisi</label>
-            <input type="text" id="f-contact">
-          </div>
-          <div class="form-group">
-            <label>Telefon</label>
-            <input type="tel" id="f-phone">
+            <label>Ad</label>
+            <input type="text" id="f-name" required placeholder="Örn. Okul Önlüğü">
           </div>
           <div class="form-group form-group--full">
-            <label>Adres</label>
-            <textarea id="f-address" rows="2"></textarea>
+            <label>Slug</label>
+            <input type="text" id="f-slug" required placeholder="okul-onlugu">
+          </div>
+          <div class="form-group">
+            <label>Sıra</label>
+            <input type="number" id="f-sort" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:28px">
+              <input type="checkbox" id="f-active" checked> Aktif
+            </label>
           </div>
         </div>
         <div class="modal__footer">
@@ -107,7 +104,8 @@
     let all = [];
 
     async function load() {
-      const { data } = await supabase.from('suppliers').select('*').order('name');
+      const { data, error } = await supabase.from('categories').select('*').order('sort_order');
+      if (error) { showToast('Hata: ' + error.message); return; }
       all = data || [];
       render(all);
     }
@@ -115,19 +113,18 @@
     function render(rows) {
       const tbody = document.getElementById('table-body');
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">🏭</div><div class="empty-state__text">Tedarikçi bulunamadı</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-state__icon">🏷️</div><div class="empty-state__text">Kategori bulunamadı</div></div></td></tr>';
         return;
       }
-      tbody.innerHTML = rows.map(s => `
+      tbody.innerHTML = rows.map(c => `
         <tr>
-          <td style="font-weight:600">${s.name}</td>
-          <td>${s.contact_name || '—'}</td>
-          <td style="font-size:13px">${s.phone || '—'}</td>
-          <td style="font-size:13px">${s.address || '—'}</td>
-          <td style="font-size:13px">${fmtDate(s.created_at)}</td>
+          <td>${c.sort_order}</td>
+          <td style="font-weight:600">${c.name}</td>
+          <td style="font-size:13px;color:var(--text-muted)">${c.slug}</td>
+          <td><span class="badge ${c.active ? 'badge--green' : 'badge--red'}">${c.active ? 'Aktif' : 'Pasif'}</span></td>
           <td style="display:flex;gap:6px">
-            <button class="btn btn--ghost btn--sm" data-edit="${s.id}">Düzenle</button>
-            <button class="btn btn--danger btn--sm" data-del="${s.id}">Sil</button>
+            <button class="btn btn--ghost btn--sm" data-edit="${c.id}">Düzenle</button>
+            <button class="btn btn--danger btn--sm" data-del="${c.id}">Sil</button>
           </td>
         </tr>
       `).join('');
@@ -135,31 +132,34 @@
       tbody.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => del(b.dataset.del)));
     }
 
-    document.getElementById('search').addEventListener('input', e => {
-      const q = e.target.value.toLowerCase();
-      render(all.filter(s =>
-        s.name.toLowerCase().includes(q) ||
-        (s.contact_name || '').toLowerCase().includes(q) ||
-        (s.phone || '').includes(q)
-      ));
+    document.getElementById('f-name').addEventListener('input', e => {
+      if (!document.getElementById('f-id').value) {
+        document.getElementById('f-slug').value = e.target.value
+          .toLowerCase().trim()
+          .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+          .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+          .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      }
     });
 
     document.getElementById('add-btn').addEventListener('click', () => {
-      document.getElementById('modal-title').textContent = 'Yeni Tedarikçi';
+      document.getElementById('modal-title').textContent = 'Yeni Kategori';
       document.getElementById('item-form').reset();
       document.getElementById('f-id').value = '';
+      document.getElementById('f-active').checked = true;
+      document.getElementById('f-sort').value = all.length;
       openModal('item-modal');
     });
 
     function openEdit(id) {
-      const s = all.find(x => x.id === id);
-      if (!s) return;
-      document.getElementById('modal-title').textContent  = 'Tedarikçiyi Düzenle';
-      document.getElementById('f-id').value       = s.id;
-      document.getElementById('f-name').value     = s.name;
-      document.getElementById('f-contact').value  = s.contact_name || '';
-      document.getElementById('f-phone').value    = s.phone || '';
-      document.getElementById('f-address').value  = s.address || '';
+      const c = all.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('modal-title').textContent = 'Kategoriyi Düzenle';
+      document.getElementById('f-id').value     = c.id;
+      document.getElementById('f-name').value   = c.name;
+      document.getElementById('f-slug').value   = c.slug;
+      document.getElementById('f-sort').value   = c.sort_order;
+      document.getElementById('f-active').checked = c.active;
       openModal('item-modal');
     }
 
@@ -167,24 +167,24 @@
       e.preventDefault();
       const id = document.getElementById('f-id').value;
       const payload = {
-        name:         document.getElementById('f-name').value.trim(),
-        contact_name: document.getElementById('f-contact').value.trim() || null,
-        phone:        document.getElementById('f-phone').value.trim() || null,
-        address:      document.getElementById('f-address').value.trim() || null,
+        name:       document.getElementById('f-name').value.trim(),
+        slug:       document.getElementById('f-slug').value.trim(),
+        sort_order: parseInt(document.getElementById('f-sort').value, 10) || 0,
+        active:     document.getElementById('f-active').checked,
       };
       if (id) payload.id = id;
-      const { error } = await supabase.from('suppliers').upsert(payload);
+      const { error } = await supabase.from('categories').upsert(payload);
       if (error) { showToast('Hata: ' + error.message); return; }
-      showToast(id ? 'Tedarikçi güncellendi' : 'Tedarikçi eklendi');
+      showToast(id ? 'Kategori güncellendi' : 'Kategori eklendi');
       closeModal('item-modal');
       load();
     });
 
     async function del(id) {
-      if (!confirm('Bu tedarikçiyi silmek istediğinize emin misiniz?')) return;
-      const { error } = await supabase.from('suppliers').delete().eq('id', id);
+      if (!confirm('Bu kategoriyi silmek istediğinize emin misiniz? Bu kategoriyi kullanan ürünler varsa silme işlemi başarısız olur.')) return;
+      const { error } = await supabase.from('categories').delete().eq('id', id);
       if (error) { showToast('Hata: ' + error.message); return; }
-      showToast('Tedarikçi silindi');
+      showToast('Kategori silindi');
       load();
     }
 

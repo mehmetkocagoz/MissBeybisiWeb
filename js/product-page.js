@@ -138,9 +138,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Stock status for the currently selected color/size combination
   const stockStatusEl = document.getElementById('stock-status');
   const addToCartBtn = document.getElementById('add-to-cart');
+  const qtyInputEl = document.getElementById('qty-input');
+  let currentVariantStock = 0;
 
   async function refreshStockStatus() {
     if (product.stock === 0) {
+      currentVariantStock = 0;
       stockStatusEl.textContent = 'Stokta Yok';
       stockStatusEl.classList.add('stock-status--oos');
       addToCartBtn.disabled = true;
@@ -148,6 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const { fetchStockByColorSize } = await import('./supabase.js');
     const qty = await fetchStockByColorSize(product.id, selectedColor, selectedSize);
+    currentVariantStock = qty;
     if (qty === 0) {
       stockStatusEl.textContent = 'Bu renk/beden için stokta yok';
       stockStatusEl.classList.add('stock-status--oos');
@@ -157,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       stockStatusEl.classList.remove('stock-status--oos');
       addToCartBtn.disabled = false;
     }
+    qtyInputEl.value = Math.min(parseInt(qtyInputEl.value) || 1, qty);
   }
 
   // Color selection
@@ -193,13 +198,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('qty-inc').addEventListener('click', () => {
     const v = parseInt(qtyInput.value);
-    if (v < 10) qtyInput.value = v + 1;
+    const max = Math.min(10, currentVariantStock);
+    if (v < max) {
+      qtyInput.value = v + 1;
+    } else {
+      showToast(`Bu renk/beden için en fazla ${currentVariantStock} adet stokta var.`);
+    }
   });
 
   // Add to cart
   document.getElementById('add-to-cart').addEventListener('click', () => {
-    const qty = parseInt(qtyInput.value) || 1;
-    Cart.addItem(product, selectedColor, selectedSize, qty);
+    const qty = Math.min(parseInt(qtyInput.value) || 1, currentVariantStock);
+    Cart.addItem(product, selectedColor, selectedSize, qty, currentVariantStock);
     showToast(`${product.name} (${selectedColor}, ${selectedSize}) sepete eklendi!`);
     updateCartBadge();
     openCartDrawer();

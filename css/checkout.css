@@ -6,10 +6,18 @@
   gap: 6px;
   font-size: 13px;
   color: var(--text-muted, #999);
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .checkout-steps .step { color: var(--text-muted, #999); }
 .checkout-steps .step.active { color: var(--accent, #e07); font-weight: 600; }
 .checkout-steps .step-sep { color: var(--text-muted, #999); }
+
+@media (max-width: 400px) {
+  .checkout-steps { font-size: 11px; gap: 4px; }
+}
 
 .checkout-main { padding: 48px 0 80px; }
 
@@ -105,8 +113,9 @@
   border: 1.5px solid #eee;
   border-radius: 14px;
   padding: 24px;
-  position: sticky;
-  top: 24px;
+}
+@media (min-width: 801px) {
+  .checkout-summary { position: sticky; top: 24px; }
 }
 .checkout-summary__title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
 

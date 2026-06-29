@@ -15,12 +15,12 @@ const Cart = (() => {
 
   function getItems() { return load(); }
 
-  function addItem(product, color, size, quantity = 1) {
+  function addItem(product, color, size, quantity = 1, maxStock = Infinity) {
     const items = load();
     const key = `${product.id}_${color}_${size}`;
     const existing = items.find(i => i.key === key);
     if (existing) {
-      existing.quantity += quantity;
+      existing.quantity = Math.min(existing.quantity + quantity, maxStock);
     } else {
       items.push({
         key,
@@ -30,7 +30,7 @@ const Cart = (() => {
         price: product.price,
         color,
         size,
-        quantity,
+        quantity: Math.min(quantity, maxStock),
         image: product.images[0]
       });
     }
@@ -42,12 +42,12 @@ const Cart = (() => {
     save(items);
   }
 
-  function updateQuantity(key, quantity) {
+  function updateQuantity(key, quantity, maxStock = Infinity) {
     const items = load();
     const item = items.find(i => i.key === key);
     if (item) {
       if (quantity < 1) { removeItem(key); return; }
-      item.quantity = quantity;
+      item.quantity = Math.min(quantity, maxStock);
       save(items);
     }
   }

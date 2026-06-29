@@ -104,9 +104,16 @@ function renderCartDrawer() {
     });
   });
   body.querySelectorAll('.qty-inc').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const item = Cart.getItems().find(i => i.key === btn.dataset.key);
-      Cart.updateQuantity(btn.dataset.key, (item ? item.quantity : 1) + 1);
+      if (!item) return;
+      const { fetchStockByColorSize } = await import('./supabase.js');
+      const stock = await fetchStockByColorSize(item.productId, item.color, item.size);
+      if (item.quantity >= stock) {
+        showToast(`Bu renk/beden için en fazla ${stock} adet stokta var.`);
+        return;
+      }
+      Cart.updateQuantity(btn.dataset.key, item.quantity + 1, stock);
       renderCartDrawer(); updateCartBadge();
     });
   });

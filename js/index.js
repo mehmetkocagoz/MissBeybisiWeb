@@ -44,14 +44,20 @@ function createProductCard(product, rootPrefix = '') {
 
 function bindQuickAdd(grid) {
   grid.querySelectorAll('.product-card__quick-add').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click', async e => {
       e.preventDefault();
       const product = getProductById(btn.dataset.id);
-      if (product) {
-        Cart.addItem(product, btn.dataset.color, btn.dataset.size);
-        showToast(`${product.name} sepete eklendi!`);
-        updateCartBadge();
+      if (!product) return;
+      const { fetchStockByColorSize } = await import('./supabase.js');
+      const stock = await fetchStockByColorSize(product.id, btn.dataset.color, btn.dataset.size);
+      const inCart = Cart.getItems().find(i => i.key === `${product.id}_${btn.dataset.color}_${btn.dataset.size}`);
+      if (stock === 0 || (inCart && inCart.quantity >= stock)) {
+        showToast('Bu renk/beden için stokta yok.');
+        return;
       }
+      Cart.addItem(product, btn.dataset.color, btn.dataset.size, 1, stock);
+      showToast(`${product.name} sepete eklendi!`);
+      updateCartBadge();
     });
   });
 }

@@ -129,11 +129,15 @@ export async function fetchStockByColorSize(productId, color, size) {
 // ── Orders ────────────────────────────────────────────────────────────────────
 
 export async function createOrder(orderData, items) {
-  const { data: order, error: orderErr } = await supabase
+  // Generate the id client-side and skip .select() on insert: anonymous
+  // checkout has no SELECT policy on orders (by design, to keep other
+  // customers' addresses/emails private), and INSERT ... RETURNING requires
+  // one — using it here would throw a row-level security error for anon.
+  const order = { id: crypto.randomUUID(), ...orderData };
+
+  const { error: orderErr } = await supabase
     .from('orders')
-    .insert(orderData)
-    .select()
-    .single();
+    .insert(order);
   if (orderErr) throw orderErr;
 
   const orderItems = items.map(item => ({ ...item, order_id: order.id }));

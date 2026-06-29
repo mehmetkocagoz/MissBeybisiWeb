@@ -935,10 +935,8 @@ h3 { font-size: 1.15rem; font-weight: 500; }
 }
 @media (min-width: 900px) {
   #product-detail { grid-template-columns: 1fr 1fr; gap: 56px; }
+  .product-detail__gallery { position: sticky; top: calc(var(--header-h) + 16px); }
 }
-
-/* Gallery */
-.product-detail__gallery { position: sticky; top: calc(var(--header-h) + 16px); }
 .gallery-main {
   position: relative;
   border-radius: var(--radius-lg);
